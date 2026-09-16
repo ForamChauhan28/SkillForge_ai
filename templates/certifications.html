@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}Recommended Certifications - SkillForge AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cert-filter-bar {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .filter-btn {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1.5rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+    }
+    
+    .cert-card {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        padding: 1.5rem;
+        transition: var(--transition);
+    }
+    
+    .cert-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    /* Gradient left border based on difficulty */
+    .cert-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background: var(--accent-gradient);
+    }
+    
+    .cert-card[data-difficulty="Beginner"]::before {
+        background: linear-gradient(to bottom, #4ade80, #22c55e);
+    }
+    
+    .cert-card[data-difficulty="Intermediate"]::before {
+        background: linear-gradient(to bottom, #facc15, #eab308);
+    }
+    
+    .cert-card[data-difficulty="Advanced"]::before {
+        background: linear-gradient(to bottom, #f87171, #ef4444);
+    }
+    
+    .cert-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        padding-left: 10px;
+    }
+    
+    .cert-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-primary);
+    }
+    
+    .cert-issuer {
+        font-size: 0.9rem;
+        color: var(--accent-primary);
+        font-weight: 500;
+        margin-top: 0.25rem;
+    }
+    
+    .difficulty-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .badge-beginner { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+    .badge-intermediate { background: rgba(234, 179, 8, 0.1); color: var(--warning); }
+    .badge-advanced { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    
+    .cert-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        flex-grow: 1;
+        padding-left: 10px;
+    }
+    
+    .cert-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        margin-left: 10px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-divider {
+        width: 1px;
+        height: 15px;
+        background: var(--border-color);
+    }
+    
+    .cert-footer {
+        padding-left: 10px;
+        margin-top: auto;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-secondary);
+        border-radius: var(--card-radius);
+        border: 1px dashed var(--border-color);
+    }
+    
+    .empty-icon {
+        font-size: 3rem;
+        color: var(--accent-secondary);
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container animate-fadeInUp">
+    <div class="page-header text-center">
+        <h1>Recommended Certifications</h1>
+        <p class="subtitle">Industry-recognized credentials for your career path</p>
+    </div>
+
+    {% if certifications %}
+    <div class="cert-filter-bar delay-1">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="Beginner">Beginner</button>
+        <button class="filter-btn" data-filter="Intermediate">Intermediate</button>
+        <button class="filter-btn" data-filter="Advanced">Advanced</button>
+    </div>
+
+    <div class="grid grid-3 delay-2" id="certGrid">
+        {% for cert in certifications %}
+        <div class="cert-card" data-difficulty="{{ cert.difficulty }}">
+            <div class="cert-header">
+                <div>
+                    <h3 class="cert-title">{{ cert.name }}</h3>
+                    <div class="cert-issuer">{{ cert.issuing_body }}</div>
+                </div>
+                <span class="difficulty-badge badge-{{ cert.difficulty|lower }}">{{ cert.difficulty }}</span>
+            </div>
+            
+            <p class="cert-desc">{{ cert.description }}</p>
+            
+            <div class="cert-info">
+                <div class="info-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>{{ cert.estimated_cost }}</span>
+                </div>
+                <div class="info-divider"></div>
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <span>{{ cert.duration }}</span>
+                </div>
+            </div>
+            
+            <div class="cert-footer">
+                <a href="{{ cert.url }}" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; display: block;">
+                    Learn More <i class="fas fa-external-link-alt" style="margin-left: 5px;"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state delay-1">
+        <div class="empty-icon"><i class="fas fa-award"></i></div>
+        <h2>No Certifications Available</h2>
+        <p class="text-secondary" style="margin: 1rem 0 2rem;">Generate a roadmap first to see recommended certifications tailored to your goals.</p>
+        <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const certCards = document.querySelectorAll('.cert-card');
+        
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                filterBtns.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                const filterValue = btn.getAttribute('data-filter');
+                
+                certCards.forEach(card => {
+                    if (filterValue === 'all' || card.getAttribute('data-difficulty') === filterValue) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

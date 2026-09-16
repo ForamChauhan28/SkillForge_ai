@@ -1,0 +1,171 @@
+{% set hide_nav = True %}
+{% extends 'base.html' %}
+
+{% block title %}Sign In - SkillForge AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: var(--bg-primary);
+        position: relative;
+    }
+    
+    .auth-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        padding: 3rem;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: var(--shadow-lg);
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .auth-logo {
+        font-size: 3rem;
+        color: var(--accent-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .auth-subtitle {
+        color: var(--text-secondary);
+    }
+    
+    .auth-links {
+        margin-top: 2rem;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+    
+    .auth-links a {
+        color: var(--accent-primary);
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    
+    .auth-links a:hover {
+        color: var(--accent-secondary);
+    }
+    
+    .theme-toggle-fixed {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+        z-index: 100;
+    }
+    
+    .theme-toggle-fixed:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Button Loading State */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+    }
+    
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: calc(50% - 10px);
+        left: calc(50% - 10px);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<button class="theme-toggle-fixed" id="themeToggle" aria-label="Toggle Theme">
+    <i class="fas fa-moon"></i>
+</button>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <i class="fas fa-bolt auth-logo"></i>
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to continue your learning journey</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" required placeholder="you@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required placeholder="Enter your password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="submitBtn">Sign In</button>
+        </form>
+        
+        <div class="auth-links">
+            <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Create one here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('submitBtn');
+        btn.classList.add('btn-loading');
+        // Let the form submit naturally
+    });
+</script>
+{% endblock %}

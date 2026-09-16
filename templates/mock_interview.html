@@ -1,0 +1,1438 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Mock Interview - SkillForge AI{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ═══════════════════════════════════════════════════
+   Mock Interview Simulator Styles
+   ═══════════════════════════════════════════════════ */
+
+/* ── Setup Screen ── */
+.setup-screen {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.setup-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.setup-card h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+}
+
+.setup-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 2.5rem;
+    font-size: 1.05rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.form-group label .label-hint {
+    font-weight: 400;
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+}
+
+.form-input, .form-select {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: var(--transition);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.round-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.round-card {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.2rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-align: center;
+}
+
+.round-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+}
+
+.round-card.selected {
+    border-color: var(--accent-primary);
+    background: rgba(124, 58, 237, 0.05);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.round-card .round-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.4rem;
+}
+
+.round-card .round-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.round-card .round-desc {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.25rem;
+}
+
+.question-count-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.question-count-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent-primary);
+}
+
+.question-count-row .count-display {
+    font-weight: 700;
+    font-size: 1.3rem;
+    color: var(--accent-primary);
+    min-width: 30px;
+    text-align: center;
+}
+
+.btn-start-interview {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent-gradient);
+    color: white;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.btn-start-interview:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
+}
+
+.btn-start-interview:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Past Sessions ── */
+.past-sessions {
+    margin-top: 2rem;
+}
+
+.past-sessions h3 {
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 0.75rem;
+    transition: var(--transition);
+}
+
+.session-item:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.session-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+}
+
+.session-info span {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+}
+
+.session-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.session-score.good { color: var(--success); }
+.session-score.okay { color: var(--warning); }
+.session-score.low { color: var(--danger); }
+
+/* ═══════════════════════════════════════════════════
+   Interview Simulator Screen
+   ═══════════════════════════════════════════════════ */
+.simulator-screen {
+    display: none;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.sim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.sim-header-left h2 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.sim-header-left .sim-meta {
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.progress-bar-container {
+    background: var(--bg-tertiary);
+    border-radius: 20px;
+    height: 8px;
+    width: 200px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--accent-gradient);
+    border-radius: 20px;
+    transition: width 0.5s ease;
+}
+
+.question-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-md);
+}
+
+.q-number-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.q-number {
+    font-weight: 700;
+    color: var(--accent-primary);
+    font-size: 0.95rem;
+}
+
+.q-badges-sim {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.badge-sim {
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-cat-technical { background: rgba(124, 58, 237, 0.1); color: var(--accent-primary); }
+.badge-cat-behavioral { background: rgba(201, 168, 76, 0.1); color: var(--accent-secondary); }
+.badge-cat-situational { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.badge-diff-easy { background: rgba(34, 197, 94, 0.08); color: var(--success); }
+.badge-diff-medium { background: rgba(234, 179, 8, 0.08); color: var(--warning); }
+.badge-diff-hard { background: rgba(239, 68, 68, 0.08); color: var(--danger); }
+
+.q-text-sim {
+    font-size: 1.3rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ── Answer Area ── */
+.answer-area {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.answer-area label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+}
+
+.answer-textarea {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.6;
+    resize: vertical;
+    transition: var(--transition);
+    box-sizing: border-box;
+}
+
+.answer-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.answer-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.voice-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-mic {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-mic:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+.btn-mic.recording {
+    border-color: var(--danger);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+    animation: pulse-mic 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-mic {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+}
+
+.mic-status {
+    font-size: 0.85rem;
+    color: var(--text-tertiary);
+}
+
+.mic-status.active {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.btn-submit-answer {
+    padding: 0.85rem 2rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent-gradient);
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-submit-answer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+}
+
+.btn-submit-answer:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-skip {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-skip:hover {
+    border-color: var(--text-tertiary);
+}
+
+/* ── Feedback Panel ── */
+.feedback-panel {
+    display: none;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-score-row {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.feedback-score-circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.feedback-score-circle.score-good { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 3px solid var(--success); }
+.feedback-score-circle.score-okay { background: rgba(234, 179, 8, 0.1); color: var(--warning); border: 3px solid var(--warning); }
+.feedback-score-circle.score-low { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 3px solid var(--danger); }
+
+.feedback-tip {
+    background: rgba(124, 58, 237, 0.05);
+    border-left: 3px solid var(--accent-primary);
+    padding: 0.75rem 1rem;
+    border-radius: 0 8px 8px 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.feedback-section {
+    margin-bottom: 1.25rem;
+}
+
+.feedback-section h4 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+}
+
+.feedback-section h4.strengths-title { color: var(--success); }
+.feedback-section h4.improve-title { color: var(--warning); }
+.feedback-section h4.model-title { color: var(--accent-primary); }
+
+.feedback-section ul {
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+}
+
+.feedback-section ul li { margin-bottom: 0.3rem; }
+
+.feedback-model-answer {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.btn-next-question {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent-gradient);
+    color: white;
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-top: 0.5rem;
+}
+
+.btn-next-question:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════
+   Report Screen
+   ═══════════════════════════════════════════════════ */
+.report-screen {
+    display: none;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.report-hero {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.report-grade {
+    font-size: 4rem;
+    font-weight: 800;
+    margin: 0.5rem 0;
+}
+
+.report-grade.grade-a { color: var(--success); }
+.report-grade.grade-b { color: #22d3ee; }
+.report-grade.grade-c { color: var(--warning); }
+.report-grade.grade-d { color: var(--danger); }
+
+.report-verdict {
+    display: inline-block;
+    padding: 0.4rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+}
+
+.verdict-hire { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+.verdict-lean-hire { background: rgba(34, 197, 94, 0.1); color: #22d3ee; }
+.verdict-lean-no-hire { background: rgba(234, 179, 8, 0.1); color: var(--warning); }
+.verdict-no-hire { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+.report-summary {
+    color: var(--text-secondary);
+    margin-top: 1rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
+
+.report-scores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.score-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.score-card .score-val {
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.score-card .score-label {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    text-transform: capitalize;
+    margin-top: 0.25rem;
+}
+
+.report-section {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--card-radius);
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.report-section h3 {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.report-section ul {
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.action-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.action-item:last-child { border-bottom: none; }
+
+.action-item .action-text {
+    flex: 1;
+    color: var(--text-primary);
+}
+
+.action-item .action-priority {
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.priority-high { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+.priority-medium { background: rgba(234, 179, 8, 0.1); color: var(--warning); }
+.priority-low { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+
+.report-encouragement {
+    text-align: center;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    padding: 1.5rem;
+    background: rgba(124, 58, 237, 0.03);
+    border-radius: 12px;
+    border: 1px dashed var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.report-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.report-actions .btn {
+    padding: 0.85rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    font-size: 1rem;
+}
+
+/* ── Loading overlay for simulator ── */
+.sim-loading {
+    display: none;
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.sim-loading .spinner-sim {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.sim-loading p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+    .round-cards { grid-template-columns: 1fr; }
+    .setup-card { padding: 1.5rem; }
+    .question-card { padding: 1.5rem; }
+    .sim-header { flex-direction: column; align-items: flex-start; }
+    .progress-bar-container { width: 100%; }
+    .feedback-score-row { flex-direction: column; align-items: flex-start; }
+    .answer-controls { flex-direction: column; }
+    .btn-submit-answer { width: 100%; justify-content: center; }
+    .report-scores-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN 1: Setup
+     ═══════════════════════════════════════════════════ -->
+<div class="setup-screen animate-fadeInUp" id="setupScreen">
+    <div class="setup-card">
+        <h1>🎙️ AI Mock Interview</h1>
+        <p class="setup-subtitle">Practice with a realistic AI interviewer. Get instant feedback and a detailed performance report.</p>
+
+        <div class="form-group">
+            <label>Target Role <span class="label-hint">— e.g. Software Engineer, Data Scientist</span></label>
+            <input type="text" class="form-input" id="roleInput"
+                   value="{{ profile.dream_job or '' }}"
+                   placeholder="Enter the job role you're preparing for">
+        </div>
+
+        <div class="form-group">
+            <label>Company Profile <span class="label-hint">— optional</span></label>
+            <select class="form-select" id="companyInput">
+                <option value="General">General / No Specific Company</option>
+                <option value="FAANG / Big Tech">FAANG / Big Tech (Google, Meta, Amazon...)</option>
+                <option value="Product Startup">Product Startup</option>
+                <option value="IT Services / Consultancy">IT Services / Consultancy</option>
+                <option value="Finance / Banking">Finance / Banking</option>
+                <option value="Healthcare Tech">Healthcare Tech</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Interview Round</label>
+            <div class="round-cards" id="roundCards">
+                <div class="round-card selected" data-round="technical_r1">
+                    <div class="round-icon">💻</div>
+                    <div class="round-name">Technical R1</div>
+                    <div class="round-desc">Core fundamentals & coding</div>
+                </div>
+                <div class="round-card" data-round="technical_r2">
+                    <div class="round-icon">🏗️</div>
+                    <div class="round-name">System Design</div>
+                    <div class="round-desc">Architecture & deep-dive</div>
+                </div>
+                <div class="round-card" data-round="hr_behavioral">
+                    <div class="round-icon">🤝</div>
+                    <div class="round-name">HR Behavioral</div>
+                    <div class="round-desc">STAR method & culture fit</div>
+                </div>
+                <div class="round-card" data-round="mixed">
+                    <div class="round-icon">🎯</div>
+                    <div class="round-name">Mixed Round</div>
+                    <div class="round-desc">Technical + behavioral</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Number of Questions</label>
+            <div class="question-count-row">
+                <input type="range" id="questionCount" min="3" max="10" value="5">
+                <span class="count-display" id="countDisplay">5</span>
+            </div>
+        </div>
+
+        <button class="btn-start-interview" id="startBtn" onclick="startInterview()">
+            🚀 Start Mock Interview
+        </button>
+    </div>
+
+    {% if past_sessions %}
+    <div class="past-sessions">
+        <h3>📋 Recent Sessions</h3>
+        {% for s in past_sessions %}
+        <div class="session-item">
+            <div class="session-info">
+                <h4>{{ s.role_title }} — {{ s.round_type.replace('_', ' ').title() }}</h4>
+                <span>{{ s.target_company or 'General' }} · {{ s.started_at.strftime('%b %d, %Y') if s.started_at else '' }}</span>
+            </div>
+            {% if s.status == 'completed' and s.overall_score is not none %}
+            <div class="session-score {% if s.overall_score >= 7 %}good{% elif s.overall_score >= 5 %}okay{% else %}low{% endif %}">
+                {{ '%.1f' | format(s.overall_score) }}/10
+            </div>
+            {% else %}
+            <span style="color: var(--text-tertiary); font-size: 0.85rem;">{{ s.status }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     Loading Screen
+     ═══════════════════════════════════════════════════ -->
+<div class="sim-loading" id="simLoading">
+    <div class="spinner-sim"></div>
+    <p id="loadingMessage">Preparing your interview questions...</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN 2: Simulator
+     ═══════════════════════════════════════════════════ -->
+<div class="simulator-screen" id="simulatorScreen">
+    <div class="sim-header">
+        <div class="sim-header-left">
+            <h2 id="simTitle">Mock Interview</h2>
+            <div class="sim-meta" id="simMeta"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:1rem;">
+            <span id="progressText" style="font-size:0.9rem; color:var(--text-tertiary);"></span>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Card -->
+    <div class="question-card" id="questionCard">
+        <div class="q-number-row">
+            <span class="q-number" id="qNumber">Question 1 of 5</span>
+            <div class="q-badges-sim" id="qBadges"></div>
+        </div>
+        <div class="q-text-sim" id="qText"></div>
+    </div>
+
+    <!-- Answer Area -->
+    <div class="answer-area" id="answerArea">
+        <label>Your Answer <span class="label-hint">— type or use the microphone</span></label>
+        <textarea class="answer-textarea" id="answerInput" placeholder="Type your answer here, or click the microphone button to speak..."></textarea>
+        <div class="answer-controls">
+            <div class="voice-controls">
+                <button class="btn-mic" id="micBtn" onclick="toggleMic()" title="Click to speak">🎤</button>
+                <span class="mic-status" id="micStatus">Click mic to speak</span>
+            </div>
+            <div style="display:flex; gap:0.75rem;">
+                <button class="btn-skip" onclick="skipQuestion()">Skip →</button>
+                <button class="btn-submit-answer" id="submitBtn" onclick="submitAnswer()">
+                    Submit Answer ✓
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Panel (hidden until answer submitted) -->
+    <div class="feedback-panel" id="feedbackPanel">
+        <div class="feedback-score-row">
+            <div class="feedback-score-circle" id="feedbackScore"></div>
+            <div class="feedback-tip" id="feedbackTip"></div>
+        </div>
+
+        <div class="feedback-section" id="feedbackStrengths">
+            <h4 class="strengths-title">✅ Strengths</h4>
+            <ul id="strengthsList"></ul>
+        </div>
+
+        <div class="feedback-section" id="feedbackImprovements">
+            <h4 class="improve-title">⚡ Areas to Improve</h4>
+            <ul id="improvementsList"></ul>
+        </div>
+
+        <div class="feedback-section">
+            <h4 class="model-title">💡 Model Answer</h4>
+            <div class="feedback-model-answer" id="modelAnswer"></div>
+        </div>
+
+        <button class="btn-next-question" id="nextBtn" onclick="nextQuestion()">
+            Next Question →
+        </button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN 3: Report
+     ═══════════════════════════════════════════════════ -->
+<div class="report-screen" id="reportScreen">
+    <div class="report-hero">
+        <h2>📊 Interview Performance Report</h2>
+        <div class="report-grade" id="reportGrade"></div>
+        <div class="report-verdict" id="reportVerdict"></div>
+        <p class="report-summary" id="reportSummary"></p>
+    </div>
+
+    <div class="report-scores-grid" id="reportScores"></div>
+
+    <div class="report-section" id="reportStrengths">
+        <h3>💪 Top Strengths</h3>
+        <ul id="reportStrengthsList"></ul>
+    </div>
+
+    <div class="report-section" id="reportImprove">
+        <h3>📈 Areas to Improve</h3>
+        <ul id="reportImproveList"></ul>
+    </div>
+
+    <div class="report-section" id="reportActions">
+        <h3>🎯 Action Plan</h3>
+        <div id="reportActionsList"></div>
+    </div>
+
+    <div class="report-encouragement" id="reportEncouragement"></div>
+
+    <div class="report-actions">
+        <button class="btn btn-primary" onclick="restartInterview()">🔄 Practice Again</button>
+        <a href="/interview" class="btn btn-secondary">📝 Question Bank</a>
+        <a href="/chat" class="btn btn-secondary">🤖 Ask Mentor</a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ═══════════════════════════════════════════════════
+//  State Management
+// ═══════════════════════════════════════════════════
+let state = {
+    sessionId: null,
+    totalQuestions: 0,
+    currentIndex: 0,
+    currentQuestion: null,
+    isSubmitting: false,
+    recognition: null,
+    isRecording: false,
+};
+
+// ═══════════════════════════════════════════════════
+//  Setup Screen Logic
+// ═══════════════════════════════════════════════════
+
+// Round card selection
+document.querySelectorAll('.round-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.round-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+    });
+});
+
+// Question count slider
+const slider = document.getElementById('questionCount');
+const countDisplay = document.getElementById('countDisplay');
+if (slider) {
+    slider.addEventListener('input', () => {
+        countDisplay.textContent = slider.value;
+    });
+}
+
+// ═══════════════════════════════════════════════════
+//  Start Interview
+// ═══════════════════════════════════════════════════
+async function startInterview() {
+    const role = document.getElementById('roleInput').value.trim();
+    if (!role) {
+        alert('Please enter a target role.');
+        return;
+    }
+
+    const company = document.getElementById('companyInput').value;
+    const roundType = document.querySelector('.round-card.selected')?.dataset.round || 'technical_r1';
+    const numQuestions = parseInt(document.getElementById('questionCount').value);
+
+    // Show loading
+    showScreen('loading');
+    document.getElementById('loadingMessage').textContent = 'Generating tailored interview questions for you...';
+
+    const startBtn = document.getElementById('startBtn');
+    startBtn.disabled = true;
+
+    try {
+        const res = await fetch('/api/mock-interview/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, company, round_type: roundType, num_questions: numQuestions })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to start interview');
+        }
+
+        // Init state
+        state.sessionId = data.session_id;
+        state.totalQuestions = data.total_questions;
+        state.currentIndex = 0;
+        state.currentQuestion = data.question;
+
+        // Update simulator header
+        document.getElementById('simTitle').textContent = `${role} Interview`;
+        const roundNames = {
+            technical_r1: 'Technical Round 1',
+            technical_r2: 'System Design',
+            hr_behavioral: 'HR Behavioral',
+            mixed: 'Mixed Round'
+        };
+        document.getElementById('simMeta').textContent = `${roundNames[roundType] || roundType} · ${company}`;
+
+        // Render first question
+        renderQuestion(data.question, 0, data.total_questions);
+        showScreen('simulator');
+
+    } catch (err) {
+        alert('Error: ' + err.message);
+        showScreen('setup');
+    } finally {
+        startBtn.disabled = false;
+    }
+}
+
+// ═══════════════════════════════════════════════════
+//  Render Question
+// ═══════════════════════════════════════════════════
+function renderQuestion(q, index, total) {
+    document.getElementById('qNumber').textContent = `Question ${index + 1} of ${total}`;
+    document.getElementById('qText').textContent = q.text;
+    document.getElementById('progressText').textContent = `${index + 1}/${total}`;
+
+    const pct = ((index) / total) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+
+    // Badges
+    const badgesEl = document.getElementById('qBadges');
+    badgesEl.innerHTML = '';
+    if (q.category) {
+        badgesEl.innerHTML += `<span class="badge-sim badge-cat-${q.category}">${q.category}</span>`;
+    }
+    if (q.difficulty) {
+        badgesEl.innerHTML += `<span class="badge-sim badge-diff-${q.difficulty}">${q.difficulty}</span>`;
+    }
+
+    // Reset answer area
+    document.getElementById('answerInput').value = '';
+    document.getElementById('answerArea').style.display = 'block';
+    document.getElementById('feedbackPanel').style.display = 'none';
+    document.getElementById('answerInput').focus();
+
+    state.currentQuestion = q;
+    state.currentIndex = index;
+}
+
+// ═══════════════════════════════════════════════════
+//  Submit Answer
+// ═══════════════════════════════════════════════════
+async function submitAnswer() {
+    const answer = document.getElementById('answerInput').value.trim();
+    if (!answer) {
+        alert('Please type or speak your answer before submitting.');
+        return;
+    }
+
+    if (state.isSubmitting) return;
+    state.isSubmitting = true;
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-sim" style="width:20px;height:20px;border-width:2px;display:inline-block;vertical-align:middle;margin:0;"></span> Evaluating...';
+
+    // Stop recording if active
+    if (state.isRecording) toggleMic();
+
+    try {
+        const res = await fetch('/api/mock-interview/answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: state.sessionId,
+                question_index: state.currentIndex,
+                answer: answer
+            })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to evaluate answer');
+        }
+
+        // Show feedback
+        renderFeedback(data.feedback, data.score, data.is_last_question);
+
+        // Store next question info
+        if (data.next_question) {
+            state.nextQuestion = data.next_question;
+        }
+        state.isLastQuestion = data.is_last_question;
+
+        // Hide answer area, show feedback
+        document.getElementById('answerArea').style.display = 'none';
+        document.getElementById('feedbackPanel').style.display = 'block';
+
+    } catch (err) {
+        alert('Error: ' + err.message);
+    } finally {
+        state.isSubmitting = false;
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Submit Answer ✓';
+    }
+}
+
+// ═══════════════════════════════════════════════════
+//  Skip Question
+// ═══════════════════════════════════════════════════
+async function skipQuestion() {
+    document.getElementById('answerInput').value = 'I would like to skip this question.';
+    await submitAnswer();
+}
+
+// ═══════════════════════════════════════════════════
+//  Render Feedback
+// ═══════════════════════════════════════════════════
+function renderFeedback(feedback, score, isLast) {
+    // Score circle
+    const scoreEl = document.getElementById('feedbackScore');
+    const scoreVal = parseFloat(score) || 0;
+    scoreEl.textContent = scoreVal.toFixed(1);
+    scoreEl.className = 'feedback-score-circle';
+    if (scoreVal >= 7) scoreEl.classList.add('score-good');
+    else if (scoreVal >= 5) scoreEl.classList.add('score-okay');
+    else scoreEl.classList.add('score-low');
+
+    // Tip
+    document.getElementById('feedbackTip').textContent = feedback.tip || 'Keep practicing!';
+
+    // Strengths
+    const strengthsList = document.getElementById('strengthsList');
+    strengthsList.innerHTML = '';
+    (feedback.strengths || []).forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        strengthsList.appendChild(li);
+    });
+
+    // Improvements
+    const improvementsList = document.getElementById('improvementsList');
+    improvementsList.innerHTML = '';
+    const improvements = [...(feedback.improvements || []), ...(feedback.missing_points || [])];
+    improvements.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        improvementsList.appendChild(li);
+    });
+
+    // Model answer
+    document.getElementById('modelAnswer').textContent = feedback.model_answer || '';
+
+    // Next button
+    const nextBtn = document.getElementById('nextBtn');
+    if (isLast) {
+        nextBtn.textContent = '📊 View Performance Report';
+        nextBtn.onclick = viewReport;
+    } else {
+        nextBtn.textContent = 'Next Question →';
+        nextBtn.onclick = nextQuestion;
+    }
+
+    // Update progress bar
+    const pct = ((state.currentIndex + 1) / state.totalQuestions) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+}
+
+// ═══════════════════════════════════════════════════
+//  Next Question
+// ═══════════════════════════════════════════════════
+function nextQuestion() {
+    if (state.nextQuestion) {
+        renderQuestion(state.nextQuestion, state.nextQuestion.index, state.totalQuestions);
+    }
+}
+
+// ═══════════════════════════════════════════════════
+//  View Report
+// ═══════════════════════════════════════════════════
+async function viewReport() {
+    showScreen('loading');
+    document.getElementById('loadingMessage').textContent = 'Generating your performance report...';
+
+    try {
+        const res = await fetch(`/api/mock-interview/${state.sessionId}/report`);
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.error || 'Failed to generate report');
+
+        renderReport(data.report);
+        showScreen('report');
+    } catch (err) {
+        alert('Error: ' + err.message);
+        showScreen('simulator');
+    }
+}
+
+// ═══════════════════════════════════════════════════
+//  Render Report
+// ═══════════════════════════════════════════════════
+function renderReport(report) {
+    // Grade
+    const gradeEl = document.getElementById('reportGrade');
+    const grade = report.overall_grade || 'N/A';
+    gradeEl.textContent = grade;
+    gradeEl.className = 'report-grade';
+    if (grade.startsWith('A')) gradeEl.classList.add('grade-a');
+    else if (grade.startsWith('B')) gradeEl.classList.add('grade-b');
+    else if (grade.startsWith('C')) gradeEl.classList.add('grade-c');
+    else gradeEl.classList.add('grade-d');
+
+    // Verdict
+    const verdictEl = document.getElementById('reportVerdict');
+    const verdict = report.verdict || 'N/A';
+    const verdictText = verdict.replace(/_/g, ' ');
+    verdictEl.textContent = verdictText;
+    verdictEl.className = 'report-verdict';
+    if (verdict === 'HIRE') verdictEl.classList.add('verdict-hire');
+    else if (verdict === 'LEAN_HIRE') verdictEl.classList.add('verdict-lean-hire');
+    else if (verdict === 'LEAN_NO_HIRE') verdictEl.classList.add('verdict-lean-no-hire');
+    else verdictEl.classList.add('verdict-no-hire');
+
+    // Summary
+    document.getElementById('reportSummary').textContent = report.summary || '';
+
+    // Category scores
+    const scoresGrid = document.getElementById('reportScores');
+    scoresGrid.innerHTML = '';
+    const catScores = report.category_scores || {};
+    Object.entries(catScores).forEach(([key, val]) => {
+        const scoreVal = parseFloat(val) || 0;
+        let color = 'var(--success)';
+        if (scoreVal < 5) color = 'var(--danger)';
+        else if (scoreVal < 7) color = 'var(--warning)';
+
+        scoresGrid.innerHTML += `
+            <div class="score-card">
+                <div class="score-val" style="color:${color}">${scoreVal.toFixed(1)}</div>
+                <div class="score-label">${key.replace(/_/g, ' ')}</div>
+            </div>`;
+    });
+
+    // Strengths
+    const strengthsList = document.getElementById('reportStrengthsList');
+    strengthsList.innerHTML = '';
+    (report.top_strengths || []).forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        strengthsList.appendChild(li);
+    });
+
+    // Improvements
+    const improveList = document.getElementById('reportImproveList');
+    improveList.innerHTML = '';
+    (report.areas_to_improve || []).forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        improveList.appendChild(li);
+    });
+
+    // Action plan
+    const actionsList = document.getElementById('reportActionsList');
+    actionsList.innerHTML = '';
+    (report.action_plan || []).forEach(a => {
+        const priority = (a.priority || 'medium').toLowerCase();
+        actionsList.innerHTML += `
+            <div class="action-item">
+                <span class="action-text">${a.action || ''} <span style="color:var(--text-tertiary);font-size:0.85rem;">(${a.timeframe || ''})</span></span>
+                <span class="action-priority priority-${priority}">${priority}</span>
+            </div>`;
+    });
+
+    // Encouragement
+    document.getElementById('reportEncouragement').textContent = report.encouragement || 'Keep practicing!';
+}
+
+// ═══════════════════════════════════════════════════
+//  Speech-to-Text (Web Speech API)
+// ═══════════════════════════════════════════════════
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.log('Speech recognition not supported');
+        const micBtn = document.getElementById('micBtn');
+        if (micBtn) micBtn.style.display = 'none';
+        return;
+    }
+
+    state.recognition = new SpeechRecognition();
+    state.recognition.continuous = true;
+    state.recognition.interimResults = true;
+    state.recognition.lang = 'en-US';
+
+    let finalTranscript = '';
+
+    state.recognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript + ' ';
+            } else {
+                interim = transcript;
+            }
+        }
+        const textarea = document.getElementById('answerInput');
+        // Preserve any text the user typed manually before starting mic
+        const existingText = textarea.dataset.preRecordingText || '';
+        textarea.value = existingText + finalTranscript + interim;
+    };
+
+    state.recognition.onerror = (event) => {
+        console.log('Speech error:', event.error);
+        if (event.error !== 'no-speech') {
+            stopRecording();
+        }
+    };
+
+    state.recognition.onend = () => {
+        if (state.isRecording) {
+            // Auto-restart if still recording
+            try { state.recognition.start(); } catch(e) {}
+        }
+    };
+}
+
+function toggleMic() {
+    if (!state.recognition) {
+        initSpeechRecognition();
+        if (!state.recognition) {
+            alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+            return;
+        }
+    }
+
+    if (state.isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+}
+
+function startRecording() {
+    const textarea = document.getElementById('answerInput');
+    textarea.dataset.preRecordingText = textarea.value;
+    
+    try {
+        state.recognition.start();
+        state.isRecording = true;
+        document.getElementById('micBtn').classList.add('recording');
+        document.getElementById('micBtn').textContent = '⏹️';
+        const statusEl = document.getElementById('micStatus');
+        statusEl.textContent = '🔴 Listening... speak now';
+        statusEl.classList.add('active');
+    } catch(e) {
+        console.log('Mic start error:', e);
+    }
+}
+
+function stopRecording() {
+    try {
+        state.recognition.stop();
+    } catch(e) {}
+    state.isRecording = false;
+    document.getElementById('micBtn').classList.remove('recording');
+    document.getElementById('micBtn').textContent = '🎤';
+    const statusEl = document.getElementById('micStatus');
+    statusEl.textContent = 'Click mic to speak';
+    statusEl.classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════
+//  Screen Management
+// ═══════════════════════════════════════════════════
+function showScreen(screen) {
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('simLoading').style.display = 'none';
+    document.getElementById('simulatorScreen').style.display = 'none';
+    document.getElementById('reportScreen').style.display = 'none';
+
+    if (screen === 'setup') document.getElementById('setupScreen').style.display = 'block';
+    else if (screen === 'loading') document.getElementById('simLoading').style.display = 'block';
+    else if (screen === 'simulator') document.getElementById('simulatorScreen').style.display = 'block';
+    else if (screen === 'report') document.getElementById('reportScreen').style.display = 'block';
+}
+
+function restartInterview() {
+    state = {
+        sessionId: null,
+        totalQuestions: 0,
+        currentIndex: 0,
+        currentQuestion: null,
+        isSubmitting: false,
+        recognition: state.recognition,
+        isRecording: false,
+    };
+    showScreen('setup');
+}
+
+// Init speech recognition on load
+document.addEventListener('DOMContentLoaded', () => {
+    initSpeechRecognition();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - SkillForge AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    @media (max-width: 768px) {
+        .analytics-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .progress-bar-container {
+        width: 100%;
+        background-color: var(--border-color);
+        border-radius: 999px;
+        height: 0.75rem;
+        overflow: hidden;
+        margin-top: 0.5rem;
+    }
+    .progress-bar-fill {
+        height: 100%;
+        background: var(--accent-gradient);
+        border-radius: 999px;
+        transition: width 1s ease-in-out;
+    }
+    .progress-bar-fill.success {
+        background: var(--success, #2e7d32);
+    }
+    .timeline {
+        border-left: 2px solid var(--border-color);
+        margin-left: 1rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+    .timeline-item {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -1.85rem;
+        top: 0.25rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--success, #2e7d32);
+        border: 2px solid var(--bg-primary);
+    }
+    .timeline-date {
+        font-size: 0.85rem;
+        color: var(--text-tertiary);
+        margin-top: 0.25rem;
+    }
+    .phase-progress-item {
+        margin-bottom: 1rem;
+    }
+    .phase-progress-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+        color: var(--text-primary);
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header animate-fadeInUp">
+    <h1>Learning Analytics</h1>
+    <p class="subtitle">Track your progress and identify skill gaps for {{ dream_job }}</p>
+</div>
+
+<div class="grid grid-4 animate-fadeInUp delay-1" style="margin-bottom: 2rem;">
+    <div class="card stat-card" style="border-top: 4px solid var(--accent-primary);">
+        <div class="stat-label">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path></svg>
+            Total Skills
+        </div>
+        <div class="stat-value counter" data-target="{{ skills_count|default(0) }}">0</div>
+    </div>
+    <div class="card stat-card" style="border-top: 4px solid var(--accent-secondary);">
+        <div class="stat-label">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            Completion
+        </div>
+        <div class="stat-value counter" data-target="{{ progress.percentage|default(0) }}">0</div>
+    </div>
+    <div class="card stat-card" style="border-top: 4px solid var(--success, #2e7d32);">
+        <div class="stat-label">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+            Phases Done
+        </div>
+        <div class="stat-value">{{ completed_phases|default(0) }}/{{ total_phases|default(0) }}</div>
+    </div>
+    <div class="card stat-card" style="border-top: 4px solid var(--info, #0288d1);">
+        <div class="stat-label">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Est. Weeks
+        </div>
+        <div class="stat-value">{{ est_weeks|default('N/A') }}</div>
+    </div>
+</div>
+
+<div class="card animate-fadeInUp delay-2" style="margin-bottom: 2rem;">
+    <h2 style="margin-top: 0;">Skill Gap Analysis — {{ dream_job }}</h2>
+    <div id="radarLoading" style="text-align: center; padding: 2rem;">
+        <div class="spinner"></div>
+        <p>Loading analysis...</p>
+    </div>
+    <div id="radarError" class="hidden" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+        Complete your profile to see skill gap analysis
+    </div>
+    <div style="position: relative; height: 400px; width: 100%; display: none;" id="radarChartContainer">
+        <canvas id="radarChart"></canvas>
+    </div>
+</div>
+
+<div class="analytics-grid animate-fadeInUp delay-3">
+    <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <h3 style="margin-top: 0; align-self: flex-start;">Overall Progress</h3>
+        <div style="position: relative; width: 250px; height: 250px;">
+            <canvas id="progressChart" data-completed="{{ progress.percentage|default(0) }}"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <h3 style="margin-top: 0;">Phase-by-Phase Progress</h3>
+        {% if progress.phase_progress %}
+            {% for phase in progress.phase_progress %}
+            <div class="phase-progress-item">
+                <div class="phase-progress-header">
+                    <span>{{ phase.title }}</span>
+                    <span>{{ phase.percentage }}%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill {% if phase.percentage == 100 %}success{% endif %}" style="width: {{ phase.percentage }}%;"></div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: var(--text-secondary);">No phase data available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card animate-fadeInUp delay-4" style="margin-bottom: 2rem;">
+    <h3 style="margin-top: 0;">Recent Activity</h3>
+    {% if progress.completed_list and progress.completed_list|length > 0 %}
+        <div class="timeline">
+            {% for item in progress.completed_list %}
+            <div class="timeline-item">
+                <div style="font-weight: 500;">{{ item.topic_name }}</div>
+                <div class="timeline-date">Completed on {{ item.completed_at }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: var(--text-secondary); font-style: italic;">Complete topics from your roadmap to see activity here.</p>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-bottom: 3rem;" class="animate-fadeInUp delay-5">
+    <a href="/api/download-report" class="btn btn-primary btn-lg">Download Report</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/analytics.js"></script>
+{% endblock %}

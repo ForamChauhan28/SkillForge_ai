@@ -1,0 +1,472 @@
+{% set hide_nav = True %}
+{% extends 'base.html' %}
+
+{% block title %}{{ roadmap.goal }} Roadmap - SkillForge AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ═══════════ Demo Roadmap Page ═══════════ */
+    .demo-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 2rem;
+        background: rgba(var(--bg-primary-rgb, 255,255,255), 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .demo-nav-brand {
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .demo-nav-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .demo-hero {
+        padding: 7rem 2rem 3rem;
+        text-align: center;
+        background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+        color: white;
+    }
+
+    .demo-hero-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+
+    .demo-hero h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .demo-hero p {
+        max-width: 650px;
+        margin: 0 auto 1.5rem;
+        opacity: 0.9;
+        font-size: 1.05rem;
+        line-height: 1.6;
+    }
+
+    .demo-meta {
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        font-size: 1rem;
+        opacity: 0.85;
+    }
+
+    .demo-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    /* CTA Banner */
+    .demo-cta-banner {
+        background: linear-gradient(135deg, #ffd700, #ff8c00);
+        color: #1a1a2e;
+        text-align: center;
+        padding: 1.25rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .demo-cta-banner a {
+        color: #1a1a2e;
+        text-decoration: underline;
+        font-weight: 800;
+        margin-left: 0.5rem;
+    }
+
+    /* Content Area */
+    .demo-content {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Milestone Banner */
+    .milestone-banner {
+        background: var(--accent-primary-light);
+        border: 1px solid var(--accent-primary);
+        border-radius: var(--card-radius);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .milestone-banner-icon { font-size: 1.5rem; }
+    .milestone-banner-text { font-weight: 600; color: var(--accent-primary); }
+    .milestone-banner-desc { color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem; }
+
+    /* Phase Card */
+    .phase-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .phase-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: var(--bg-tertiary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .phase-number {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        color: white;
+        font-weight: 800;
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .phase-info h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .phase-info p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .phase-duration {
+        margin-left: auto;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Topic Item */
+    .topic-item {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .topic-item:last-child { border-bottom: none; }
+
+    .topic-item:hover {
+        background: var(--bg-tertiary);
+    }
+
+    .topic-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .topic-status {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .topic-status.recommended { background: var(--success); }
+    .topic-status.alternative { background: var(--warning); }
+    .topic-status.flexible { background: var(--text-secondary); }
+
+    .topic-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        flex: 1;
+    }
+
+    .topic-priority {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+    }
+
+    .topic-priority.high { background: rgba(239,68,68,0.1); color: #ef4444; }
+    .topic-priority.medium { background: rgba(251,191,36,0.1); color: #f59e0b; }
+    .topic-priority.low { background: rgba(107,114,128,0.1); color: #6b7280; }
+
+    .topic-toggle {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        transition: transform 0.3s;
+    }
+
+    .topic-item.open .topic-toggle { transform: rotate(180deg); }
+
+    /* Topic Drawer */
+    .topic-drawer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease;
+        padding: 0 1.5rem;
+    }
+
+    .topic-item.open .topic-drawer {
+        max-height: 600px;
+        padding: 0 1.5rem 1.25rem;
+    }
+
+    .drawer-definition {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+
+    .drawer-section-title {
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .subtopics-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .subtopic-tag {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: 1px solid var(--border-color);
+    }
+
+    .resource-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .resource-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0;
+    }
+
+    .resource-item a {
+        color: var(--accent-primary);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .resource-item a:hover { text-decoration: underline; }
+
+    .resource-type {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        background: var(--accent-primary-light);
+        color: var(--accent-primary);
+    }
+
+    /* Legend */
+    .legend {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    /* Footer */
+    .demo-footer {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border-color);
+        font-size: 0.85rem;
+    }
+
+    @media (max-width: 768px) {
+        .demo-hero h1 { font-size: 2rem; }
+        .demo-meta { flex-direction: column; gap: 0.5rem; align-items: center; }
+        .phase-header { flex-wrap: wrap; }
+        .phase-duration { margin-left: 0; margin-top: 0.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Top Navigation -->
+<nav class="demo-nav">
+    <a href="/" class="demo-nav-brand">⚡ SkillForge AI</a>
+    <div class="demo-nav-actions">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="font-size: 0.9rem; padding: 0.5rem 1.25rem;">Get Started Free</a>
+        <button class="theme-toggle-fixed" id="demoThemeToggle" aria-label="Toggle Theme" style="position: static; width: 40px; height: 40px; background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary);">
+            <span id="demoThemeIcon">🌙</span>
+        </button>
+    </div>
+</nav>
+
+<!-- Hero -->
+<div class="demo-hero">
+    <div class="demo-hero-icon">{{ roadmap.icon }}</div>
+    <h1>{{ roadmap.goal }} Roadmap</h1>
+    <p>{{ roadmap.description }}</p>
+    <div class="demo-meta">
+        <span>📅 {{ roadmap.estimated_weeks }} Weeks</span>
+        <span>📚 {{ roadmap.phases | length }} Phases</span>
+        <span>🎯 {{ roadmap.phases | map(attribute='topics') | map('length') | sum }} Topics</span>
+    </div>
+</div>
+
+<!-- CTA Banner -->
+<div class="demo-cta-banner">
+    ✨ This is a sample roadmap. Want one personalized to YOUR resume?
+    <a href="{{ url_for('auth.register') }}">Sign up free →</a>
+</div>
+
+<!-- Roadmap Content -->
+<div class="demo-content">
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item"><span class="topic-status recommended"></span> Recommended</div>
+        <div class="legend-item"><span class="topic-status alternative"></span> Alternative</div>
+        <div class="legend-item"><span class="topic-status flexible"></span> Flexible</div>
+    </div>
+
+    {% for phase in roadmap.phases %}
+    <!-- Phase {{ phase.phase_id }} -->
+    <div class="phase-card">
+        <div class="phase-header">
+            <div class="phase-number">{{ phase.phase_id }}</div>
+            <div class="phase-info">
+                <h3>{{ phase.title }}</h3>
+                <p>{{ phase.description }}</p>
+            </div>
+            <span class="phase-duration">⏱️ {{ phase.duration_weeks }} weeks</span>
+        </div>
+
+        {% for topic in phase.topics %}
+        <div class="topic-item" onclick="this.classList.toggle('open')">
+            <div class="topic-header">
+                <span class="topic-status {{ topic.status }}"></span>
+                <span class="topic-name">{{ topic.name }}</span>
+                <span class="topic-priority {{ topic.priority }}">{{ topic.priority }}</span>
+                <span class="topic-toggle">▼</span>
+            </div>
+            <div class="topic-drawer">
+                <p class="drawer-definition">{{ topic.drawer_content.definition }}</p>
+
+                <div class="drawer-section-title">Key Subtopics</div>
+                <div class="subtopics-list">
+                    {% for sub in topic.drawer_content.subtopics %}
+                    <span class="subtopic-tag">{{ sub }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="drawer-section-title">Free Resources</div>
+                <ul class="resource-list">
+                    {% for res in topic.drawer_content.free_resources %}
+                    <li class="resource-item">
+                        <span class="resource-type">{{ res.type }}</span>
+                        <a href="{{ res.url }}" target="_blank" rel="noopener">{{ res.title }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Milestone after this phase -->
+    {% for ms in roadmap.milestones %}
+        {% if ms.after_phase == phase.phase_id %}
+        <div class="milestone-banner">
+            <span class="milestone-banner-icon">🏆</span>
+            <div>
+                <div class="milestone-banner-text">Milestone: {{ ms.title }}</div>
+                <div class="milestone-banner-desc">{{ ms.description }}</div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    {% endfor %}
+
+    <!-- Bottom CTA -->
+    <div style="text-align: center; padding: 2rem 0;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem;">Ready to get YOUR personalized roadmap?</h2>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.9rem 2.5rem; border-radius: 30px;">🚀 Create Free Account</a>
+    </div>
+</div>
+
+<footer class="demo-footer">
+    <a href="/" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;">← Back to Home</a>
+    &nbsp;&middot;&nbsp;
+    &copy; 2025 SkillForge AI
+</footer>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Theme toggle
+    const demoToggle = document.getElementById('demoThemeToggle');
+    const demoIcon = document.getElementById('demoThemeIcon');
+    if (demoToggle) {
+        const cur = document.documentElement.getAttribute('data-theme') || 'light';
+        demoIcon.textContent = cur === 'dark' ? '☀️' : '🌙';
+        demoToggle.addEventListener('click', () => {
+            const c = document.documentElement.getAttribute('data-theme');
+            const n = c === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', n);
+            localStorage.setItem('skillforge-theme', n);
+            demoIcon.textContent = n === 'dark' ? '☀️' : '🌙';
+        });
+    }
+</script>
+{% endblock %}

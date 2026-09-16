@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+
+{% block title %}Recommended Projects - SkillForge AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .tabs-container {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .tab-btn {
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 2rem;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: var(--transition);
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .tab-btn:hover {
+        border-color: var(--accent-primary);
+    }
+    
+    .tab-btn.active {
+        background: var(--accent-gradient);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 15px rgba(74, 63, 138, 0.3);
+    }
+    
+    .count-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+    }
+    
+    .tab-btn:not(.active) .count-badge {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+    
+    .proj-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        overflow: hidden;
+        transition: var(--transition);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .proj-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .tier-stripe {
+        height: 6px;
+        width: 100%;
+    }
+    
+    .stripe-beginner { background: linear-gradient(90deg, #4ade80, #22c55e); }
+    .stripe-intermediate { background: linear-gradient(90deg, #facc15, #eab308); }
+    .stripe-advanced { background: linear-gradient(90deg, #f87171, #ef4444); }
+    
+    .proj-content {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .proj-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+    
+    .proj-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-primary);
+        line-height: 1.3;
+    }
+    
+    .tier-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-left: 1rem;
+    }
+    
+    .badge-beginner { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+    .badge-intermediate { background: rgba(234, 179, 8, 0.1); color: var(--warning); }
+    .badge-advanced { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    
+    .proj-desc {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .tech-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tech-pill {
+        background: var(--bg-tertiary);
+        color: var(--text-primary);
+        font-size: 0.8rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+    }
+    
+    .toggle-details-btn {
+        width: 100%;
+        margin-top: auto;
+    }
+    
+    .proj-details {
+        display: none;
+        padding: 1.5rem;
+        background: var(--bg-tertiary);
+        border-top: 1px solid var(--border-color);
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .details-section {
+        margin-bottom: 1rem;
+    }
+    
+    .details-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .outcomes-list, .prereq-list {
+        padding-left: 1.25rem;
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .outcomes-list li {
+        margin-bottom: 0.25rem;
+        list-style-type: '✓ ';
+        color: var(--text-secondary);
+    }
+    
+    .outcomes-list li::marker {
+        color: var(--success);
+    }
+    
+    .est-hours {
+        display: inline-block;
+        background: rgba(74, 63, 138, 0.1);
+        color: var(--accent-primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--bg-secondary);
+        border-radius: var(--card-radius);
+        border: 1px dashed var(--border-color);
+        grid-column: 1 / -1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container animate-fadeInUp">
+    <div class="page-header text-center">
+        <h1>Project Portfolio</h1>
+        <p class="subtitle">Hands-on projects to build your skills and resume</p>
+    </div>
+
+    {% if projects %}
+    <div class="tabs-container delay-1">
+        <button class="tab-btn active" data-tier="all">
+            All <span class="count-badge">{{ projects|length }}</span>
+        </button>
+        <button class="tab-btn" data-tier="Beginner">
+            Beginner <span class="count-badge">{{ beginner|length if beginner else 0 }}</span>
+        </button>
+        <button class="tab-btn" data-tier="Intermediate">
+            Intermediate <span class="count-badge">{{ intermediate|length if intermediate else 0 }}</span>
+        </button>
+        <button class="tab-btn" data-tier="Advanced">
+            Advanced <span class="count-badge">{{ advanced|length if advanced else 0 }}</span>
+        </button>
+    </div>
+
+    <div class="grid grid-3 delay-2" id="projectsGrid">
+        {% for p in projects %}
+        <div class="proj-card" data-tier="{{ p.tier }}">
+            <div class="tier-stripe stripe-{{ p.tier|lower }}"></div>
+            <div class="proj-content">
+                <div class="proj-header">
+                    <h3 class="proj-title">{{ p.title }}</h3>
+                    <span class="tier-badge badge-{{ p.tier|lower }}">{{ p.tier }}</span>
+                </div>
+                
+                <p class="proj-desc">{{ p.description }}</p>
+                
+                <div class="tech-stack">
+                    {% for tech in p.tech_stack %}
+                    <span class="tech-pill">{{ tech }}</span>
+                    {% endfor %}
+                </div>
+                
+                <button class="btn btn-secondary toggle-details-btn">View Details</button>
+            </div>
+            
+            <div class="proj-details">
+                <div class="details-section">
+                    <div class="details-title">Learning Outcomes</div>
+                    <ul class="outcomes-list">
+                        {% for outcome in p.learning_outcomes %}
+                        <li>{{ outcome }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                {% if p.prerequisites %}
+                <div class="details-section">
+                    <div class="details-title">Prerequisites</div>
+                    <ul class="prereq-list">
+                        {% for req in p.prerequisites %}
+                        <li>{{ req }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <div class="est-hours">
+                    <i class="fas fa-clock"></i> {{ p.estimated_hours }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state delay-1">
+        <div style="font-size: 3rem; color: var(--accent-secondary); margin-bottom: 1rem;"><i class="fas fa-laptop-code"></i></div>
+        <h2>No Projects Available</h2>
+        <p class="text-secondary" style="margin: 1rem 0 2rem;">Generate a roadmap first to see recommended projects tailored to your goals.</p>
+        <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab Filtering
+        const tabs = document.querySelectorAll('.tab-btn');
+        const cards = document.querySelectorAll('.proj-card');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const tier = tab.getAttribute('data-tier');
+                
+                cards.forEach(card => {
+                    // Always collapse details when filtering
+                    const details = card.querySelector('.proj-details');
+                    const btn = card.querySelector('.toggle-details-btn');
+                    details.style.display = 'none';
+                    btn.textContent = 'View Details';
+                    
+                    if (tier === 'all' || card.getAttribute('data-tier') === tier) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Toggle Details
+        const toggleBtns = document.querySelectorAll('.toggle-details-btn');
+        
+        toggleBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const card = this.closest('.proj-card');
+                const details = card.querySelector('.proj-details');
+                
+                if (details.style.display === 'block') {
+                    details.style.display = 'none';
+                    this.textContent = 'View Details';
+                } else {
+                    details.style.display = 'block';
+                    this.textContent = 'Hide Details';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

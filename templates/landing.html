@@ -1,0 +1,786 @@
+{% set hide_nav = True %}
+{% extends 'base.html' %}
+
+{% block title %}SkillForge AI - Your AI-Powered Career Companion{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ═══════════ Animated Hero Gradient ═══════════ */
+    .landing-hero {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #667eea, #764ba2);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        color: white;
+        overflow: hidden;
+        padding: 2rem;
+    }
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    [data-theme="light"] .landing-hero {
+        background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #fda085);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+    }
+
+    /* Floating particles */
+    .hero-particles {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        z-index: 1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .particle {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        animation: floatParticle 20s infinite linear;
+    }
+
+    @keyframes floatParticle {
+        0% { transform: translateY(100vh) scale(0); opacity: 0; }
+        50% { opacity: 0.6; }
+        100% { transform: translateY(-100px) scale(1); opacity: 0; }
+    }
+
+    .landing-hero-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+        animation: fadeInUp 1s ease-out;
+    }
+
+    .logo-container {
+        font-size: 3.5rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .logo-icon-hero {
+        font-size: 3rem;
+        filter: drop-shadow(0 0 12px rgba(255,200,50,0.6));
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        background: linear-gradient(to right, #ffffff, #ffd700, #ffffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-tagline {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 1rem 0 1.5rem;
+        color: #ffd700;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    .hero-subtitle {
+        font-size: 1.15rem;
+        margin-bottom: 2.5rem;
+        opacity: 0.9;
+        line-height: 1.7;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+        background: linear-gradient(135deg, #ffd700, #ff8c00);
+        color: #1a1a2e;
+        font-weight: 700;
+        font-size: 1.1rem;
+        padding: 0.9rem 2.5rem;
+        border-radius: 30px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+    }
+
+    .btn-hero-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+    }
+
+    .btn-hero-secondary {
+        background: rgba(255,255,255,0.12);
+        color: white;
+        border: 2px solid rgba(255,255,255,0.4);
+        font-size: 1.1rem;
+        font-weight: 600;
+        padding: 0.9rem 2.5rem;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        backdrop-filter: blur(4px);
+    }
+
+    .btn-hero-secondary:hover {
+        background: rgba(255,255,255,0.25);
+        border-color: white;
+        transform: translateY(-3px);
+    }
+
+    /* ═══════════ Theme Toggle (Landing) ═══════════ */
+    .theme-toggle-fixed {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 100;
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.25);
+        color: white;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.2);
+        font-size: 1.3rem;
+    }
+
+    .theme-toggle-fixed:hover {
+        transform: scale(1.15) rotate(15deg);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    /* ═══════════ Sections ═══════════ */
+    .landing-section {
+        padding: 5rem 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 3.5rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .section-subtitle {
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+        font-size: 1.05rem;
+    }
+
+    /* ═══════════ How It Works ═══════════ */
+    .steps-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        position: relative;
+    }
+
+    .steps-grid::before {
+        content: '';
+        position: absolute;
+        top: 50px;
+        left: 15%;
+        right: 15%;
+        height: 3px;
+        background: var(--accent-gradient);
+        z-index: 0;
+    }
+
+    .step-card {
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-number {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.25rem;
+        box-shadow: 0 4px 20px rgba(74, 63, 138, 0.3);
+    }
+
+    .step-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .step-title { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .step-desc { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
+
+    /* ═══════════ Features Grid ═══════════ */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .feature-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+    }
+
+    .feature-card:nth-child(1)::before { background: linear-gradient(90deg, #667eea, #764ba2); }
+    .feature-card:nth-child(2)::before { background: linear-gradient(90deg, #f093fb, #f5576c); }
+    .feature-card:nth-child(3)::before { background: linear-gradient(90deg, #4facfe, #00f2fe); }
+    .feature-card:nth-child(4)::before { background: linear-gradient(90deg, #43e97b, #38f9d7); }
+    .feature-card:nth-child(5)::before { background: linear-gradient(90deg, #fa709a, #fee140); }
+    .feature-card:nth-child(6)::before { background: linear-gradient(90deg, #a18cd1, #fbc2eb); }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--accent-primary);
+    }
+
+    .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .feature-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-primary); }
+    .feature-desc { color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem; }
+
+    /* ═══════════ Demo Roadmaps ═══════════ */
+    .roadmaps-section {
+        background: var(--bg-secondary);
+        padding: 5rem 2rem;
+    }
+
+    .roadmaps-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .roadmap-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        padding: 2rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s;
+        text-decoration: none;
+        display: block;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .roadmap-card::after {
+        content: 'View Roadmap →';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 0.75rem;
+        background: var(--accent-gradient);
+        color: white;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transform: translateY(100%);
+        transition: transform 0.3s;
+    }
+
+    .roadmap-card:hover {
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-5px);
+    }
+
+    .roadmap-card:hover::after {
+        transform: translateY(0);
+    }
+
+    .roadmap-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .roadmap-meta {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1.25rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .roadmap-phases {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .phase-pill {
+        background: var(--accent-primary-light);
+        color: var(--accent-primary);
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid transparent;
+    }
+
+    .phase-arrow {
+        color: var(--accent-secondary);
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+
+    /* ═══════════ Trending Roles ═══════════ */
+    .roles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .role-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: all 0.3s;
+    }
+
+    .role-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent-primary);
+    }
+
+    .role-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+    .role-title { font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; font-size: 1rem; }
+    .role-growth { color: var(--success); font-weight: 700; font-size: 1.1rem; margin-bottom: 0.25rem; }
+    .role-salary { color: var(--text-secondary); font-size: 0.85rem; }
+
+    /* ═══════════ CTA Section ═══════════ */
+    .cta-section {
+        text-align: center;
+        padding: 6rem 2rem;
+        background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+        color: white;
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .cta-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+
+    .btn-cta {
+        background: linear-gradient(135deg, #ffd700, #ff8c00);
+        color: #1a1a2e;
+        font-weight: 700;
+        font-size: 1.2rem;
+        padding: 1rem 3rem;
+        border-radius: 30px;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+        box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+    }
+
+    .btn-cta:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+    }
+
+    /* ═══════════ Footer ═══════════ */
+    .landing-footer {
+        text-align: center;
+        padding: 2rem;
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border-color);
+        font-size: 0.9rem;
+    }
+
+    /* ═══════════ Animations ═══════════ */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scroll-reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 0.8s ease-out;
+    }
+
+    .scroll-reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+        .hero-title { font-size: 2.5rem; }
+        .hero-tagline { font-size: 1.25rem; }
+        .hero-cta { flex-direction: column; align-items: center; }
+        .steps-grid { grid-template-columns: 1fr; }
+        .steps-grid::before { display: none; }
+        .section-title { font-size: 2rem; }
+        .theme-toggle-fixed { top: 1rem; right: 1rem; width: 42px; height: 42px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Theme Toggle -->
+<button class="theme-toggle-fixed" id="landingThemeToggle" aria-label="Toggle Theme">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="landing-hero">
+    <div class="hero-particles" id="particles"></div>
+    <div class="landing-hero-content">
+        <div class="logo-container">
+            <span class="logo-icon-hero">⚡</span>
+            <span>SkillForge AI</span>
+        </div>
+        <h2 class="hero-tagline">Your AI-Powered Career Companion</h2>
+        <p class="hero-subtitle">Upload your resume, discover skill gaps, and get a personalized learning roadmap powered by AI to land your dream role.</p>
+        <div class="hero-cta">
+            <a href="{{ url_for('auth.register') }}" class="btn-hero-primary">🚀 Get Started Free</a>
+            <a href="{{ url_for('auth.login') }}" class="btn-hero-secondary">Sign In</a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section class="landing-section">
+    <div class="section-header scroll-reveal">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Three simple steps to accelerate your career</p>
+    </div>
+
+    <div class="steps-grid">
+        <div class="step-card scroll-reveal">
+            <div class="step-number">1</div>
+            <div class="step-icon">📄</div>
+            <h3 class="step-title">Upload Your Resume</h3>
+            <p class="step-desc">Our AI reads your resume and instantly extracts your skills, experience level, and competencies.</p>
+        </div>
+        <div class="step-card scroll-reveal">
+            <div class="step-number">2</div>
+            <div class="step-icon">🧠</div>
+            <h3 class="step-title">AI Analyzes Gaps</h3>
+            <p class="step-desc">We compare your profile against your dream job's requirements and identify exactly what you need to learn.</p>
+        </div>
+        <div class="step-card scroll-reveal">
+            <div class="step-number">3</div>
+            <div class="step-icon">🗺️</div>
+            <h3 class="step-title">Get Your Roadmap</h3>
+            <p class="step-desc">Receive a personalized, phase-by-phase learning plan with free resources, projects, and interview prep.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ FEATURES ═══════════ -->
+<section class="landing-section" style="padding-top: 2rem;">
+    <div class="section-header scroll-reveal">
+        <h2 class="section-title">Powerful Features</h2>
+        <p class="section-subtitle">Everything you need to go from where you are to where you want to be.</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card scroll-reveal">
+            <div class="feature-icon">📋</div>
+            <h3 class="feature-title">AI Skill Extraction</h3>
+            <p class="feature-desc">Upload your resume and let our AI instantly identify your core competencies and hidden strengths.</p>
+        </div>
+        <div class="feature-card scroll-reveal">
+            <div class="feature-icon">🗺️</div>
+            <h3 class="feature-title">Smart Roadmaps</h3>
+            <p class="feature-desc">Get a dynamically generated, step-by-step learning path tailored to the gap between your skills and dream job.</p>
+        </div>
+        <div class="feature-card scroll-reveal">
+            <div class="feature-icon">🎯</div>
+            <h3 class="feature-title">Interview Prep</h3>
+            <p class="feature-desc">Practice with AI-generated interview questions customized to your target role, with model answers.</p>
+        </div>
+        <div class="feature-card scroll-reveal">
+            <div class="feature-icon">📊</div>
+            <h3 class="feature-title">ATS Resume Score</h3>
+            <p class="feature-desc">See how your resume performs against Applicant Tracking Systems and get actionable improvement tips.</p>
+        </div>
+        <div class="feature-card scroll-reveal">
+            <div class="feature-icon">🤖</div>
+            <h3 class="feature-title">AI Career Mentor</h3>
+            <p class="feature-desc">Chat 24/7 with a personalized AI mentor that knows your background and career aspirations.</p>
+        </div>
+        <div class="feature-card scroll-reveal">
+            <div class="feature-icon">📈</div>
+            <h3 class="feature-title">Progress Analytics</h3>
+            <p class="feature-desc">Track your learning journey with interactive charts, celebrating milestones toward your goals.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ DEMO ROADMAPS ═══════════ -->
+<section class="roadmaps-section">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="section-header scroll-reveal">
+            <h2 class="section-title">Explore Career Paths</h2>
+            <p class="section-subtitle">Click any roadmap to preview a full AI-generated learning path — no sign-up required.</p>
+        </div>
+
+        <div class="roadmaps-grid">
+            {% if demo_roadmaps %}
+                {% for roadmap in demo_roadmaps %}
+                <a href="/demo-roadmap/{{ roadmap.slug }}" class="roadmap-card scroll-reveal">
+                    <h3 class="roadmap-title">{{ roadmap.icon }} {{ roadmap.title }}</h3>
+                    <div class="roadmap-meta">
+                        <span>📅 {{ roadmap.weeks }} Weeks</span>
+                        <span>📚 {{ roadmap.topics_count }} Topics</span>
+                    </div>
+                    <div class="roadmap-phases">
+                        {% for phase in roadmap.phases %}
+                            <span class="phase-pill">{{ phase }}</span>
+                            {% if not loop.last %}
+                                <span class="phase-arrow">→</span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <a href="/demo-roadmap/full-stack-developer" class="roadmap-card scroll-reveal">
+                    <h3 class="roadmap-title">⚡ Full Stack Developer</h3>
+                    <div class="roadmap-meta">
+                        <span>📅 16 Weeks</span>
+                        <span>📚 25 Topics</span>
+                    </div>
+                    <div class="roadmap-phases">
+                        <span class="phase-pill">Frontend</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">Backend</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">Database</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">Deployment</span>
+                    </div>
+                </a>
+                <a href="/demo-roadmap/data-scientist" class="roadmap-card scroll-reveal">
+                    <h3 class="roadmap-title">📊 Data Scientist</h3>
+                    <div class="roadmap-meta">
+                        <span>📅 20 Weeks</span>
+                        <span>📚 30 Topics</span>
+                    </div>
+                    <div class="roadmap-phases">
+                        <span class="phase-pill">Python</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">Stats</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">ML Models</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">Deep Learning</span>
+                    </div>
+                </a>
+                <a href="/demo-roadmap/backend-developer" class="roadmap-card scroll-reveal">
+                    <h3 class="roadmap-title">🔧 Backend Developer</h3>
+                    <div class="roadmap-meta">
+                        <span>📅 18 Weeks</span>
+                        <span>📚 28 Topics</span>
+                    </div>
+                    <div class="roadmap-phases">
+                        <span class="phase-pill">Programming</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">Databases</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">APIs</span>
+                        <span class="phase-arrow">→</span>
+                        <span class="phase-pill">DevOps</span>
+                    </div>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TRENDING ROLES ═══════════ -->
+<section class="landing-section">
+    <div class="section-header scroll-reveal">
+        <h2 class="section-title">Trending Career Roles 2025</h2>
+        <p class="section-subtitle">Discover the most in-demand roles driving the future.</p>
+    </div>
+
+    <div class="roles-grid">
+        <div class="role-card scroll-reveal">
+            <div class="role-icon">🤖</div>
+            <h4 class="role-title">AI/ML Engineer</h4>
+            <div class="role-growth">↑ +45% YoY</div>
+            <div class="role-salary">Avg: $145k</div>
+        </div>
+        <div class="role-card scroll-reveal">
+            <div class="role-icon">☁️</div>
+            <h4 class="role-title">Cloud DevOps</h4>
+            <div class="role-growth">↑ +32% YoY</div>
+            <div class="role-salary">Avg: $135k</div>
+        </div>
+        <div class="role-card scroll-reveal">
+            <div class="role-icon">📊</div>
+            <h4 class="role-title">Data Engineer</h4>
+            <div class="role-growth">↑ +28% YoY</div>
+            <div class="role-salary">Avg: $130k</div>
+        </div>
+        <div class="role-card scroll-reveal">
+            <div class="role-icon">🛡️</div>
+            <h4 class="role-title">Cybersecurity</h4>
+            <div class="role-growth">↑ +35% YoY</div>
+            <div class="role-salary">Avg: $120k</div>
+        </div>
+        <div class="role-card scroll-reveal">
+            <div class="role-icon">⚡</div>
+            <h4 class="role-title">Full Stack Dev</h4>
+            <div class="role-growth">↑ +22% YoY</div>
+            <div class="role-salary">Avg: $115k</div>
+        </div>
+        <div class="role-card scroll-reveal">
+            <div class="role-icon">📱</div>
+            <h4 class="role-title">Mobile Dev</h4>
+            <div class="role-growth">↑ +18% YoY</div>
+            <div class="role-salary">Avg: $110k</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="cta-section">
+    <div class="scroll-reveal">
+        <h2 class="cta-title">Ready to Accelerate Your Career?</h2>
+        <p class="cta-subtitle">Join thousands of professionals building their future with AI-powered roadmaps.</p>
+        <a href="{{ url_for('auth.register') }}" class="btn-cta">🚀 Create Free Account</a>
+    </div>
+</section>
+
+<footer class="landing-footer">
+    <p>&copy; 2025 SkillForge AI. All rights reserved,by chetandabhi686@gmail.com</p>
+</footer>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Theme Toggle for Landing Page
+    const landingToggle = document.getElementById('landingThemeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    if (landingToggle) {
+        // Set icon based on current theme
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        themeIcon.textContent = current === 'dark' ? '☀️' : '🌙';
+
+        landingToggle.addEventListener('click', () => {
+            const cur = document.documentElement.getAttribute('data-theme');
+            const next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('skillforge-theme', next);
+            themeIcon.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+    }
+
+    // Particle Generation
+    const particlesContainer = document.getElementById('particles');
+    if (particlesContainer) {
+        for (let i = 0; i < 50; i++) {
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            const size = Math.random() * 6 + 2;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.animationDuration = `${Math.random() * 15 + 10}s`;
+            p.style.animationDelay = `-${Math.random() * 20}s`;
+            particlesContainer.appendChild(p);
+        }
+    }
+
+    // Scroll Reveal
+    const revealElements = document.querySelectorAll('.scroll-reveal');
+    const revealOnScroll = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+        });
+    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+    revealElements.forEach(el => revealOnScroll.observe(el));
+</script>
+{% endblock %}

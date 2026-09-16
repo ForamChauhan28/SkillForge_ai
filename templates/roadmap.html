@@ -1,0 +1,609 @@
+{% extends 'base.html' %}
+
+{% block title %}Roadmap - SkillForge AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .roadmap-container {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    
+    /* Sticky Header */
+    .sticky-header {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        padding: 1rem 1.5rem;
+        border-radius: var(--card-radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .dark-mode .sticky-header {
+        background: rgba(10, 10, 26, 0.9);
+    }
+    .sticky-header h1 {
+        margin: 0;
+        font-size: 1.25rem;
+        white-space: nowrap;
+    }
+    .progress-bar-container {
+        flex-grow: 1;
+        background-color: var(--border-color);
+        border-radius: 999px;
+        height: 1rem;
+        overflow: hidden;
+    }
+    .progress-bar-fill {
+        height: 100%;
+        background: var(--accent-gradient);
+        border-radius: 999px;
+        transition: width 0.5s ease-in-out;
+    }
+    .progress-stats {
+        font-weight: 600;
+        white-space: nowrap;
+        color: var(--text-secondary);
+    }
+
+    /* Sidebar Stepper */
+    .sidebar {
+        flex: 0 0 280px;
+        position: sticky;
+        top: 80px;
+        height: calc(100vh - 100px);
+        overflow-y: auto;
+    }
+    .stepper {
+        position: relative;
+        padding-left: 1.5rem;
+        margin: 0;
+        list-style: none;
+    }
+    .stepper::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0.75rem;
+        width: 2px;
+        background-color: var(--border-color);
+    }
+    .step-item {
+        position: relative;
+        padding-bottom: 2rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .step-item:hover {
+        opacity: 0.8;
+    }
+    .step-indicator {
+        position: absolute;
+        left: -1.5rem;
+        top: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 50%;
+        background-color: var(--bg-primary);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: var(--text-secondary);
+        z-index: 2;
+    }
+    .step-item.completed .step-indicator {
+        background-color: var(--success, #2e7d32);
+        border-color: var(--success, #2e7d32);
+        color: white;
+    }
+    .step-item.current .step-indicator {
+        background-color: var(--accent-primary);
+        border-color: var(--accent-primary);
+        color: white;
+        box-shadow: 0 0 0 4px rgba(74, 63, 138, 0.2);
+    }
+    .step-content {
+        padding-left: 1rem;
+    }
+    .step-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--text-primary);
+    }
+    .step-meta {
+        font-size: 0.8rem;
+        color: var(--text-tertiary);
+    }
+
+    /* Main Area */
+    .main-area {
+        flex-grow: 1;
+        min-width: 0;
+    }
+    .phase-section {
+        margin-bottom: 3rem;
+    }
+    .phase-header-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .phase-header-card h2 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+    }
+    .phase-duration {
+        display: inline-block;
+        background: var(--bg-tertiary);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+    .topics-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    /* Topic Card */
+    .topic-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        padding: 1rem;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+    .topic-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    .topic-card.status-recommended { border-left: 4px solid var(--accent-primary); }
+    .topic-card.status-alternative { border-left: 4px solid var(--success, #2e7d32); }
+    .topic-card.status-flexible { border-left: 4px solid var(--text-tertiary); }
+    
+    .topic-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    .topic-title {
+        font-weight: 600;
+        font-size: 1.05rem;
+        margin-right: 0.5rem;
+    }
+    .checkbox-wrapper {
+        width: 1.25rem;
+        height: 1.25rem;
+        border: 2px solid var(--border-color);
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .topic-card.completed .checkbox-wrapper {
+        background: var(--success, #2e7d32);
+        border-color: var(--success, #2e7d32);
+        color: white;
+    }
+    .topic-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+        flex-grow: 1;
+    }
+    .badges-row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        font-weight: 500;
+    }
+    .badge.priority-high { background: rgba(211, 47, 47, 0.1); color: #d32f2f; }
+    .badge.priority-medium { background: rgba(245, 124, 0, 0.1); color: #f57c00; }
+    .badge.priority-low { background: rgba(56, 142, 60, 0.1); color: #388e3c; }
+
+    /* Milestone */
+    .milestone-card {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(201, 168, 76, 0.1);
+        border: 1px solid var(--accent-secondary);
+        border-radius: var(--card-radius);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .milestone-icon {
+        color: var(--accent-secondary);
+    }
+
+    /* Drawer */
+    .drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+    }
+    .drawer-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .drawer {
+        position: fixed;
+        top: 0;
+        right: -420px;
+        width: 400px;
+        max-width: 100vw;
+        height: 100vh;
+        background: var(--bg-primary);
+        box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+        z-index: 101;
+        transition: right 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    .drawer.active {
+        right: 0;
+    }
+    .drawer-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .drawer-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+    }
+    .drawer-close {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 0.25rem;
+    }
+    .drawer-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+    .drawer-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        background: var(--bg-secondary);
+    }
+    .resource-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: background 0.2s;
+    }
+    .resource-link:hover {
+        background: var(--bg-tertiary);
+    }
+    .resource-type {
+        font-size: 0.7rem;
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        background: var(--border-color);
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    @media (max-width: 992px) {
+        .roadmap-container { flex-direction: column; }
+        .sidebar { flex: none; height: auto; position: relative; top: 0; margin-bottom: 2rem; overflow-x: auto;}
+        .stepper { display: flex; padding-left: 0; margin-top: 1.5rem;}
+        .stepper::before { top: 0.75rem; left: 0; right: 0; width: 100%; height: 2px; }
+        .step-item { padding-bottom: 0; padding-right: 2rem; }
+        .step-indicator { left: 0; top: 0; position: relative; margin-bottom: 0.5rem;}
+        .step-content { padding-left: 0; white-space: nowrap; }
+    }
+    @media (max-width: 768px) {
+        .topics-grid { grid-template-columns: 1fr; }
+        .sticky-header { flex-wrap: wrap; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if not raw_json or not raw_json.roadmap %}
+<div class="card text-center" style="margin-top: 2rem;">
+    <h2>Roadmap not generated yet</h2>
+    <p>Please wait while we generate your customized learning roadmap.</p>
+</div>
+{% else %}
+<div class="sticky-header">
+    <h1>Path to {{ raw_json.roadmap.goal }}</h1>
+    <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="mainProgressFill" style="width: {{ progress.percentage }}%;"></div>
+    </div>
+    <div class="progress-stats">
+        <span id="mainProgressText">{{ progress.completed_nodes }}/{{ progress.total_nodes }}</span> completed
+    </div>
+</div>
+
+<div class="roadmap-container">
+    <!-- Sidebar Stepper -->
+    <div class="sidebar">
+        <ul class="stepper" id="phaseStepper">
+            {% set current_found = false %}
+            {% for phase in raw_json.roadmap.phases %}
+                {% set ns = namespace(completed_topics=0, total_topics=phase.topics|length) %}
+                {% for topic in phase.topics %}
+                    {% for n in nodes %}
+                        {% if n.topic_name == topic.name and n.is_completed %}
+                            {% set ns.completed_topics = ns.completed_topics + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                
+                {% set is_completed = (ns.completed_topics == ns.total_topics and ns.total_topics > 0) %}
+                {% set is_current = not is_completed and not current_found %}
+                {% if is_current %}{% set current_found = true %}{% endif %}
+                
+                <li class="step-item {% if is_completed %}completed{% elif is_current %}current{% endif %}" onclick="scrollToPhase('phase-{{ loop.index }}')">
+                    <div class="step-indicator">{{ loop.index }}</div>
+                    <div class="step-content">
+                        <div class="step-title">{{ phase.title }}</div>
+                        <div class="step-meta">{{ ns.completed_topics }}/{{ ns.total_topics }} topics</div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-area">
+        {% for phase in raw_json.roadmap.phases %}
+        <div class="phase-section" id="phase-{{ loop.index }}">
+            <div class="phase-header-card">
+                <h2>Phase {{ loop.index }}: {{ phase.title }}</h2>
+                <div class="phase-duration">{{ phase.duration_weeks }}</div>
+                <p>{{ phase.description }}</p>
+            </div>
+            
+            <div class="topics-grid">
+                {% for topic in phase.topics %}
+                    {% set ns = namespace(node_id=None, is_completed=false) %}
+                    {% for n in nodes %}
+                        {% if n.topic_name == topic.name %}
+                            {% set ns.node_id = n.node_id %}
+                            {% set ns.is_completed = n.is_completed %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <div class="topic-card status-{{ topic.status|lower }} {% if ns.is_completed %}completed{% endif %}" 
+                         data-topic="{{ topic.name|escape }}" 
+                         data-node-id="{{ ns.node_id }}"
+                         data-completed="{{ 'true' if ns.is_completed else 'false' }}"
+                         onclick="openDrawer(this)">
+                        <div class="topic-header">
+                            <div class="topic-title">{{ topic.name }}</div>
+                            <div class="checkbox-wrapper">
+                                {% if ns.is_completed %}
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="topic-desc">{{ topic.description }}</div>
+                        <div class="badges-row">
+                            <span class="badge priority-{{ topic.priority|lower }}">{{ topic.priority|capitalize }} Priority</span>
+                            <span class="badge" style="background:var(--bg-tertiary);">{{ topic.status|capitalize }}</span>
+                        </div>
+                        
+                        <!-- Hidden data for drawer -->
+                        <script type="application/json" class="drawer-data">
+                            {{ topic.drawer_content|tojson|safe if topic.drawer_content else 'null' }}
+                        </script>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Milestone check -->
+            {% if raw_json.roadmap.milestones %}
+                {% for milestone in raw_json.roadmap.milestones %}
+                    {% if milestone.after_phase == phase.phase_id %}
+                    <div class="milestone-card">
+                        <svg class="milestone-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                        <div>
+                            <h4 style="margin:0 0 0.25rem 0;">Milestone Reached!</h4>
+                            <p style="margin:0; font-size:0.9rem;">{{ milestone.title }} - {{ milestone.description }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Drawer HTML -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="topicDrawer">
+    <div class="drawer-header">
+        <div>
+            <span id="drawerStatusBadge" class="badge" style="background:var(--bg-tertiary); margin-bottom:0.5rem; display:inline-block;">Status</span>
+            <h2 class="drawer-title" id="drawerTitle">Topic Name</h2>
+        </div>
+        <button class="drawer-close" onclick="closeDrawer()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+        <!-- populated dynamically -->
+    </div>
+    <div class="drawer-footer">
+        <button id="drawerToggleBtn" class="btn btn-primary" style="width:100%;" onclick="toggleCurrentNode()">Mark as Complete</button>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if raw_json and raw_json.roadmap %}
+<script>
+    let currentNodeId = null;
+    let currentCardElement = null;
+
+    function scrollToPhase(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            const y = el.getBoundingClientRect().top + window.scrollY - 100;
+            window.scrollTo({top: y, behavior: 'smooth'});
+        }
+    }
+
+    function openDrawer(cardEl) {
+        currentCardElement = cardEl;
+        const title = cardEl.getAttribute('data-topic');
+        currentNodeId = cardEl.getAttribute('data-node-id');
+        const isCompleted = cardEl.getAttribute('data-completed') === 'true';
+        
+        // Setup Header
+        document.getElementById('drawerTitle').innerText = title;
+        
+        // Setup Button
+        const btn = document.getElementById('drawerToggleBtn');
+        if (isCompleted) {
+            btn.innerText = 'Mark Incomplete';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+        } else {
+            btn.innerText = 'Mark as Complete';
+            btn.classList.add('btn-primary');
+            btn.classList.remove('btn-secondary');
+        }
+
+        // Setup Body
+        const body = document.getElementById('drawerBody');
+        body.innerHTML = '';
+        
+        const dataScript = cardEl.querySelector('.drawer-data');
+        let drawerData = null;
+        if (dataScript) {
+            try {
+                drawerData = JSON.parse(dataScript.textContent);
+            } catch (e) {}
+        }
+
+        if (drawerData) {
+            if (drawerData.definition) {
+                body.innerHTML += `<h3>About</h3><p>${drawerData.definition}</p>`;
+            }
+            if (drawerData.subtopics && drawerData.subtopics.length > 0) {
+                let html = `<h3>Subtopics to Learn</h3><ul>`;
+                drawerData.subtopics.forEach(st => {
+                    html += `<li>${st}</li>`;
+                });
+                html += `</ul>`;
+                body.innerHTML += html;
+            }
+            if (drawerData.free_resources && drawerData.free_resources.length > 0) {
+                let html = `<h3>Free Resources</h3><div style="display:flex; flex-direction:column; gap:0.5rem;">`;
+                drawerData.free_resources.forEach(res => {
+                    const typeLabel = res.url.includes('youtube.com') || res.url.includes('youtu.be') ? 'Video' : 
+                                      res.url.includes('github') ? 'Code' : 'Article';
+                    html += `
+                    <a href="${res.url}" target="_blank" class="resource-link">
+                        <span class="resource-type">${typeLabel}</span>
+                        <span>${res.title}</span>
+                    </a>`;
+                });
+                html += `</div>`;
+                body.innerHTML += html;
+            }
+        } else {
+            body.innerHTML = '<p>No additional details available for this topic.</p>';
+        }
+
+        // Show Drawer
+        document.getElementById('drawerOverlay').classList.add('active');
+        document.getElementById('topicDrawer').classList.add('active');
+        document.body.style.overflow = 'hidden'; // prevent background scrolling
+    }
+
+    function closeDrawer() {
+        document.getElementById('drawerOverlay').classList.remove('active');
+        document.getElementById('topicDrawer').classList.remove('active');
+        document.body.style.overflow = '';
+        currentNodeId = null;
+        currentCardElement = null;
+    }
+
+    async function toggleCurrentNode() {
+        if (!currentNodeId) return;
+
+        try {
+            const res = await fetch(`/api/toggle-node/${currentNodeId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.success && data.node) {
+                // Update Card
+                const isCompleted = data.node.is_completed;
+                currentCardElement.setAttribute('data-completed', isCompleted ? 'true' : 'false');
+                
+                const cbWrapper = currentCardElement.querySelector('.checkbox-wrapper');
+                if (isCompleted) {
+                    currentCardElement.classList.add('completed');
+                    cbWrapper.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                } else {
+                    currentCardElement.classList.remove('completed');
+                    cbWrapper.innerHTML = '';
+                }
+
+                // Reload to update progress counters everywhere
+                closeDrawer();
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error('Failed to toggle node', err);
+            alert('Failed to update progress');
+        }
+    }
+</script>
+{% endif %}
+{% endblock %}

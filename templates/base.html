@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SkillForge AI — AI-powered career roadmap platform that analyzes your resume, identifies skill gaps, and generates personalized learning paths.">
+    <title>{% block title %}SkillForge AI{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Animated Background Orbs -->
+    <div class="bg-pattern">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+
+    {% if not hide_nav %}
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <a href="{{ url_for('dashboard.dashboard') }}" class="nav-brand">
+            <span class="logo-icon">⚡</span>
+            SkillForge AI
+        </a>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="{{ url_for('dashboard.dashboard') }}" class="{% if request.endpoint == 'dashboard.dashboard' %}active{% endif %}">Dashboard</a></li>
+            <li><a href="{{ url_for('roadmap.roadmap_view') }}" class="{% if request.endpoint == 'roadmap.roadmap_view' %}active{% endif %}">Roadmap</a></li>
+            <li><a href="{{ url_for('roadmap.projects_view') }}" class="{% if request.endpoint == 'roadmap.projects_view' %}active{% endif %}">Projects</a></li>
+            <li><a href="{{ url_for('roadmap.certifications_view') }}" class="{% if request.endpoint == 'roadmap.certifications_view' %}active{% endif %}">Certs</a></li>
+            <li><a href="{{ url_for('roadmap.interview_view') }}" class="{% if request.endpoint == 'roadmap.interview_view' %}active{% endif %}">Interview</a></li>
+            <li><a href="{{ url_for('mock_interview.simulator_view') }}" class="{% if request.endpoint == 'mock_interview.simulator_view' %}active{% endif %}">🎙️ Mock</a></li>
+            <li><a href="{{ url_for('chat.chat_view') }}" class="{% if request.endpoint == 'chat.chat_view' %}active{% endif %}">Mentor</a></li>
+            <li><a href="{{ url_for('analytics.analytics_view') }}" class="{% if request.endpoint == 'analytics.analytics_view' %}active{% endif %}">Analytics</a></li>
+        </ul>
+
+        <div class="nav-right">
+            <div class="theme-toggle" id="themeToggle" title="Toggle theme" role="button" tabindex="0">
+                <span class="toggle-icon-sun">☀️</span>
+                <span class="toggle-icon-moon">🌙</span>
+                <div class="toggle-thumb"></div>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-secondary" title="Logout">🚪 Logout</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="main-content" style="padding-bottom: 0; margin-bottom: -2rem;">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" id="flashAlert">
+                {% if category == 'success' %}✅{% elif category == 'danger' %}❌{% elif category == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="{% if not hide_nav %}main-content{% endif %}">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="spinner"></div>
+            <p id="loadingText">Processing...</p>
+            <p class="loading-sub" id="loadingSubtext">This may take a few seconds</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

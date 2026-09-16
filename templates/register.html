@@ -1,0 +1,295 @@
+{% set hide_nav = True %}
+{% extends 'base.html' %}
+
+{% block title %}Register - SkillForge AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: var(--bg-primary);
+        position: relative;
+    }
+    
+    .auth-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        padding: 3rem;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: var(--shadow-lg);
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .auth-logo {
+        font-size: 3rem;
+        color: var(--accent-primary);
+        margin-bottom: 1rem;
+    }
+    
+    .auth-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .auth-subtitle {
+        color: var(--text-secondary);
+    }
+    
+    .auth-links {
+        margin-top: 2rem;
+        text-align: center;
+        color: var(--text-secondary);
+    }
+    
+    .auth-links a {
+        color: var(--accent-primary);
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+    }
+    
+    .auth-links a:hover {
+        color: var(--accent-secondary);
+    }
+    
+    .theme-toggle-fixed {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+        z-index: 100;
+    }
+    
+    .theme-toggle-fixed:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Button Loading State */
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+    }
+    
+    .btn-loading::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: calc(50% - 10px);
+        left: calc(50% - 10px);
+        border: 2px solid rgba(255, 255, 255, 0.5);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Real-time validation styles */
+    .input-valid {
+        border-color: var(--success) !important;
+    }
+    .input-invalid {
+        border-color: var(--danger) !important;
+    }
+    
+    /* Password Strength Meter */
+    .strength-meter {
+        height: 6px;
+        background-color: var(--bg-tertiary);
+        border-radius: 3px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .strength-meter-fill {
+        height: 100%;
+        width: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .strength-text {
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+        text-align: right;
+        display: block;
+        min-height: 1.2em;
+    }
+    
+    .weak { width: 33%; background-color: var(--danger); }
+    .medium { width: 66%; background-color: var(--warning); }
+    .strong { width: 100%; background-color: var(--success); }
+    
+    .text-weak { color: var(--danger); }
+    .text-medium { color: var(--warning); }
+    .text-strong { color: var(--success); }
+</style>
+{% endblock %}
+
+{% block content %}
+<button class="theme-toggle-fixed" id="themeToggle" aria-label="Toggle Theme">
+    <i class="fas fa-moon"></i>
+</button>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <i class="fas fa-bolt auth-logo"></i>
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Join SkillForge AI and accelerate your career</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm">
+            <div class="form-group">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" id="name" name="name" class="form-input" required placeholder="Enter your full name">
+            </div>
+            
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" required placeholder="you@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" required placeholder="Create a strong password">
+                <div class="strength-meter">
+                    <div id="strengthFill" class="strength-meter-fill"></div>
+                </div>
+                <span id="strengthText" class="strength-text"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required placeholder="Confirm your password">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="submitBtn">Create Account</button>
+        </form>
+        
+        <div class="auth-links">
+            <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign in here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const confirmInput = document.getElementById('confirm_password');
+    const strengthFill = document.getElementById('strengthFill');
+    const strengthText = document.getElementById('strengthText');
+    const registerForm = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Email validation
+    emailInput.addEventListener('input', function() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (this.value === '') {
+            this.classList.remove('input-valid', 'input-invalid');
+        } else if (emailRegex.test(this.value)) {
+            this.classList.add('input-valid');
+            this.classList.remove('input-invalid');
+        } else {
+            this.classList.add('input-invalid');
+            this.classList.remove('input-valid');
+        }
+    });
+
+    // Password strength
+    passwordInput.addEventListener('input', function() {
+        const val = this.value;
+        strengthFill.className = 'strength-meter-fill';
+        strengthText.className = 'strength-text';
+        
+        if (val.length === 0) {
+            strengthText.textContent = '';
+        } else if (val.length < 6) {
+            strengthFill.classList.add('weak');
+            strengthText.textContent = 'Weak';
+            strengthText.classList.add('text-weak');
+        } else if (val.length >= 8 && /[0-9]/.test(val) && /[a-zA-Z]/.test(val)) {
+            strengthFill.classList.add('strong');
+            strengthText.textContent = 'Strong';
+            strengthText.classList.add('text-strong');
+        } else {
+            strengthFill.classList.add('medium');
+            strengthText.textContent = 'Medium';
+            strengthText.classList.add('text-medium');
+        }
+        
+        // Re-check confirm password on password change
+        checkConfirmPassword();
+    });
+
+    // Confirm password matching
+    function checkConfirmPassword() {
+        if (confirmInput.value === '') {
+            confirmInput.classList.remove('input-valid', 'input-invalid');
+            return;
+        }
+        
+        if (confirmInput.value === passwordInput.value) {
+            confirmInput.classList.add('input-valid');
+            confirmInput.classList.remove('input-invalid');
+        } else {
+            confirmInput.classList.add('input-invalid');
+            confirmInput.classList.remove('input-valid');
+        }
+    }
+    
+    confirmInput.addEventListener('input', checkConfirmPassword);
+
+    // Form submit loading state
+    registerForm.addEventListener('submit', function(e) {
+        if (passwordInput.value !== confirmInput.value) {
+            e.preventDefault();
+            alert("Passwords do not match!");
+            return;
+        }
+        submitBtn.classList.add('btn-loading');
+    });
+</script>
+{% endblock %}
