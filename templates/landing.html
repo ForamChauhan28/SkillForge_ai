@@ -5,7 +5,7 @@
 
 {% block extra_css %}
 <style>
-    /* ═══════════ Animated Hero Gradient ═══════════ */
+    /* ═══════════ Premium Hero Background ═══════════ */
     .landing-hero {
         position: relative;
         min-height: 100vh;
@@ -14,93 +14,49 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #667eea, #764ba2);
-        background-size: 400% 400%;
-        animation: gradientShift 15s ease infinite;
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
         color: white;
         overflow: hidden;
         padding: 2rem;
-    }
-
-    @keyframes gradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
-    [data-theme="light"] .landing-hero {
-        background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #fda085);
-        background-size: 400% 400%;
-        animation: gradientShift 15s ease infinite;
-    }
-
-    /* Floating particles */
-    .hero-particles {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-        z-index: 1;
-        overflow: hidden;
-        pointer-events: none;
-    }
-
-    .particle {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.12);
-        animation: floatParticle 20s infinite linear;
-    }
-
-    @keyframes floatParticle {
-        0% { transform: translateY(100vh) scale(0); opacity: 0; }
-        50% { opacity: 0.6; }
-        100% { transform: translateY(-100px) scale(1); opacity: 0; }
     }
 
     .landing-hero-content {
         position: relative;
         z-index: 2;
         max-width: 800px;
-        animation: fadeInUp 1s ease-out;
     }
 
     .logo-container {
-        font-size: 3.5rem;
+        font-size: 3rem;
         margin-bottom: 0.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 0.75rem;
+        font-weight: 700;
     }
 
-    .logo-icon-hero {
-        font-size: 3rem;
-        filter: drop-shadow(0 0 12px rgba(255,200,50,0.6));
-    }
+    .logo-icon-hero { display: inline-block; font-size: 3.5rem; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
 
     .hero-title {
         font-size: 3.5rem;
-        font-weight: 800;
-        letter-spacing: -1px;
-        background: linear-gradient(to right, #ffffff, #ffd700, #ffffff);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: white;
     }
 
     .hero-tagline {
         font-size: 1.5rem;
         font-weight: 600;
         margin: 1rem 0 1.5rem;
-        color: #ffd700;
-        text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        color: #e8f3ff;
     }
 
     .hero-subtitle {
-        font-size: 1.15rem;
+        font-size: 1.125rem;
         margin-bottom: 2.5rem;
-        opacity: 0.9;
-        line-height: 1.7;
+        opacity: 0.95;
+        line-height: 1.6;
         max-width: 600px;
         margin-left: auto;
         margin-right: auto;
@@ -114,42 +70,37 @@
     }
 
     .btn-hero-primary {
-        background: linear-gradient(135deg, #ffd700, #ff8c00);
-        color: #1a1a2e;
+        background: white;
+        color: var(--accent-primary);
         font-weight: 700;
-        font-size: 1.1rem;
-        padding: 0.9rem 2.5rem;
-        border-radius: 30px;
-        border: none;
+        font-size: 1.125rem;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        border: 2px solid white;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: background-color 0.2s;
         text-decoration: none;
-        box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
     }
 
     .btn-hero-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+        background: #f3f2f1;
     }
 
     .btn-hero-secondary {
-        background: rgba(255,255,255,0.12);
+        background: transparent;
         color: white;
-        border: 2px solid rgba(255,255,255,0.4);
-        font-size: 1.1rem;
+        border: 2px solid white;
+        font-size: 1.125rem;
         font-weight: 600;
-        padding: 0.9rem 2.5rem;
-        border-radius: 30px;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: background-color 0.2s;
         text-decoration: none;
-        backdrop-filter: blur(4px);
     }
 
     .btn-hero-secondary:hover {
-        background: rgba(255,255,255,0.25);
-        border-color: white;
-        transform: translateY(-3px);
+        background: rgba(255,255,255,0.1);
     }
 
     /* ═══════════ Theme Toggle (Landing) ═══════════ */
@@ -158,9 +109,10 @@
         top: 1.5rem;
         right: 1.5rem;
         z-index: 100;
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.25);
+        background: rgba(255,255,255,0.1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.2);
         color: white;
         width: 48px;
         height: 48px;
@@ -290,7 +242,7 @@
     .feature-card:hover {
         transform: translateY(-8px);
         box-shadow: var(--shadow-lg);
-        border-color: var(--accent-primary);
+        border-color: transparent;
     }
 
     .feature-icon { font-size: 2.5rem; margin-bottom: 1rem; }
@@ -441,22 +393,20 @@
     }
 
     .btn-cta {
-        background: linear-gradient(135deg, #ffd700, #ff8c00);
-        color: #1a1a2e;
+        background: var(--accent-primary);
+        color: white;
         font-weight: 700;
-        font-size: 1.2rem;
-        padding: 1rem 3rem;
-        border-radius: 30px;
+        font-size: 1.125rem;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
         border: none;
         text-decoration: none;
         display: inline-block;
-        transition: all 0.3s;
-        box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+        transition: background-color 0.2s;
     }
 
     .btn-cta:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6);
+        background: var(--accent-primary-hover);
     }
 
     /* ═══════════ Footer ═══════════ */

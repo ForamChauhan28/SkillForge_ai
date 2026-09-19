@@ -9,11 +9,9 @@ client = None
 
 # Ordered model fallback chain — if one fails, try the next
 MODEL_CHAIN = [
-    'gemini-3.5-flash',          # Fast and capable
+    'gemini-3.6-flash',          # Latest fast and capable
+    'gemini-3.5-flash',          # Previous gen fallback
     'gemini-3.5-flash-lite',     # Cost-efficient fallback
-    'gemini-3.1-flash-lite',     # Lighter fallback
-    'gemini-2.5-flash',          # Previous gen fallback
-    'gemini-2.0-flash',          # Legacy fallback
 ]
 
 def get_client():

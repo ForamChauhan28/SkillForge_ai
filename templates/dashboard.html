@@ -6,14 +6,7 @@
 .dashboard-header {
     margin-bottom: 2rem;
 }
-.stat-card {
-    position: relative;
-    border-top: 4px solid var(--accent-primary);
-    overflow: hidden;
-}
-.stat-card.accent-secondary {
-    border-top: 4px solid var(--accent-secondary);
-}
+
 .stat-card-icon {
     position: absolute;
     top: 1rem;
@@ -36,7 +29,7 @@
 }
 .circle-bg {
     fill: none;
-    stroke: #eee;
+    stroke: var(--border-color);
     stroke-width: 3.8;
 }
 .circle {
@@ -80,7 +73,7 @@
 }
 .upload-zone:hover, .upload-zone.dragover {
     border-color: var(--accent-primary);
-    background: rgba(74, 63, 138, 0.05);
+    background: var(--accent-primary-light);
 }
 .skill-tags {
     display: flex;
@@ -120,7 +113,7 @@
 </div>
 
 <div class="grid grid-4 animate-fadeInUp delay-1">
-    <div class="card card-glass stat-card">
+    <div class="card stat-card">
         <i class="fas fa-brain stat-card-icon"></i>
         <h3>Skills Extracted</h3>
         <div class="stat-value">
@@ -132,7 +125,7 @@
         </div>
     </div>
     
-    <div class="card card-glass stat-card accent-secondary">
+    <div class="card stat-card accent-secondary">
         <i class="fas fa-file-alt stat-card-icon"></i>
         <h3>ATS Score</h3>
         <div class="stat-value">
@@ -144,7 +137,7 @@
         </div>
     </div>
 
-    <div class="card card-glass stat-card">
+    <div class="card stat-card">
         <i class="fas fa-chart-line stat-card-icon"></i>
         <h3>Progress</h3>
         <div class="stat-value">
@@ -156,7 +149,7 @@
         </div>
     </div>
 
-    <div class="card card-glass stat-card accent-secondary">
+    <div class="card stat-card accent-secondary">
         <i class="fas fa-bullseye stat-card-icon"></i>
         <h3>Dream Job</h3>
         <div class="stat-value" style="font-size: 1.5rem; margin-top: 1rem; line-height: 1.2;">
@@ -173,7 +166,7 @@
     <!-- Left Column -->
     <div class="animate-fadeInUp delay-2">
         {% if not profile or not profile.extracted_skills %}
-        <div class="card card-glass" id="upload-section">
+        <div class="card" id="upload-section">
             <h2>Upload Resume</h2>
             <p class="text-secondary" style="margin-bottom: 1.5rem;">Upload your resume to extract skills and analyze ATS compatibility.</p>
             <div class="upload-zone" id="drop-zone">
@@ -187,12 +180,12 @@
                 <p style="margin-top: 1rem;">Analyzing resume...</p>
             </div>
         </div>
-        <div id="skills-section" class="hidden card card-glass" style="margin-bottom: 2rem;">
+        <div id="skills-section" class="hidden card" style="margin-bottom: 2rem;">
             <h2>Your Skills</h2>
             <div id="categorized-skills" class="skill-tags" style="margin-top: 1rem;"></div>
         </div>
         {% else %}
-        <div class="card card-glass" style="margin-bottom: 2rem;">
+        <div class="card" style="margin-bottom: 2rem;">
             <h2>Your Skills</h2>
             <div class="skill-tags" style="margin-top: 1rem;">
                 {% for skill in profile.extracted_skills.split(',') %}
@@ -202,7 +195,7 @@
         </div>
         {% endif %}
         
-        <div class="card card-glass {% if not profile or not profile.extracted_skills %}hidden{% endif %}" id="dream-job-section" style="margin-bottom: 2rem;">
+        <div class="card {% if not profile or not profile.extracted_skills %}hidden{% endif %}" id="dream-job-section" style="margin-bottom: 2rem;">
             <h2>Dream Job</h2>
             <p class="text-secondary">What role are you aiming for?</p>
             <div class="form-group" style="margin-top: 1rem;">
@@ -221,7 +214,7 @@
     <!-- Right Column -->
     <div class="animate-fadeInUp delay-3">
         {% if ats_score and ats_score.categories %}
-        <div class="card card-glass">
+        <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2>ATS Analysis</h2>
                 <button id="rescore-btn" class="btn btn-secondary btn-sm">Rescore Resume</button>
@@ -254,7 +247,7 @@
                         <span>{{ val }}/20</span>
                     </div>
                     <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: {{ (val/20)*100 }}%;"></div>
+                        <div class="progress-bar" {{ ('style="width: ' ~ ((val/20)*100) ~ '%;"') | safe }}></div>
                     </div>
                 </div>
                 {% endfor %}
@@ -275,13 +268,13 @@
             {% endif %}
         </div>
         {% elif profile and profile.extracted_skills and not ats_score %}
-        <div class="card card-glass">
+        <div class="card">
             <h2>ATS Analysis</h2>
             <p class="text-secondary" style="margin-top: 1rem;">Your resume has been processed. ATS scoring will appear after your next roadmap generation or resume re-upload.</p>
             <button id="rescore-btn" class="btn btn-primary" style="margin-top: 1rem;">Score My Resume Now</button>
         </div>
         {% elif not profile or not profile.extracted_skills %}
-        <div class="card card-glass" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px; text-align: center;">
+        <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px; text-align: center;">
             <i class="fas fa-file-signature" style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem;"></i>
             <h3 class="text-secondary">ATS Score Details</h3>
             <p class="text-tertiary" style="margin-top: 0.5rem;">Upload your resume to see your ATS score breakdown.</p>
@@ -294,32 +287,32 @@
 <div class="animate-fadeInUp delay-4" style="margin-top: 2rem;">
     <h2 class="page-header" style="margin-bottom: 1.5rem;">Quick Actions</h2>
     <div class="grid grid-3">
-        <a href="/roadmap" class="card card-glass action-card">
+        <a href="/roadmap" class="card action-card">
             <i class="fas fa-map action-icon"></i>
             <h3>Roadmap</h3>
             <p class="text-secondary">View your learning path</p>
         </a>
-        <a href="/projects" class="card card-glass action-card">
+        <a href="/projects" class="card action-card">
             <i class="fas fa-laptop-code action-icon"></i>
             <h3>Projects</h3>
             <p class="text-secondary">Build your portfolio</p>
         </a>
-        <a href="/certifications" class="card card-glass action-card">
+        <a href="/certifications" class="card action-card">
             <i class="fas fa-certificate action-icon"></i>
             <h3>Certifications</h3>
             <p class="text-secondary">Validate your skills</p>
         </a>
-        <a href="/interview" class="card card-glass action-card">
+        <a href="/interview" class="card action-card">
             <i class="fas fa-user-tie action-icon"></i>
             <h3>Interview</h3>
             <p class="text-secondary">Practice answering questions</p>
         </a>
-        <a href="/chat" class="card card-glass action-card">
+        <a href="/chat" class="card action-card">
             <i class="fas fa-comments action-icon"></i>
             <h3>Mentor Chat</h3>
             <p class="text-secondary">Get AI career advice</p>
         </a>
-        <a href="/api/download-report" class="card card-glass action-card" target="_blank">
+        <a href="/api/download-report" class="card action-card" target="_blank">
             <i class="fas fa-download action-icon"></i>
             <h3>Download Report</h3>
             <p class="text-secondary">Export your progress</p>

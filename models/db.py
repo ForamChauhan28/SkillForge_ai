@@ -155,19 +155,23 @@ def init_database():
             ("user_profiles", "ats_score_json", "ALTER TABLE user_profiles ADD COLUMN ats_score_json TEXT AFTER resume_text"),
         ]
 
-        cursor = conn.cursor()
         for table, column, sql in migrations:
+            migrate_cursor = conn.cursor(buffered=True)
             try:
-                cursor.execute(f"SELECT {column} FROM {table} LIMIT 0")
+                migrate_cursor.execute(f"SELECT {column} FROM {table} LIMIT 0")
+                migrate_cursor.fetchall()  # Consume the result set
             except Exception:
                 try:
-                    cursor.execute(sql)
+                    migrate_cursor.close()
+                    migrate_cursor = conn.cursor(buffered=True)
+                    migrate_cursor.execute(sql)
                     conn.commit()
                     print(f"[OK] Added column {column} to {table}")
                 except Exception as me:
                     print(f"[INFO] Migration note for {table}.{column}: {me}")
+            finally:
+                migrate_cursor.close()
 
-        cursor.close()
         conn.close()
         print("[OK] Database and tables initialized successfully!")
 

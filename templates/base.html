@@ -14,12 +14,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Animated Background Orbs -->
-    <div class="bg-pattern">
-        <div class="orb"></div>
-        <div class="orb"></div>
-        <div class="orb"></div>
-    </div>
+
 
     {% if not hide_nav %}
     <!-- Navigation -->
@@ -43,11 +38,7 @@
         </ul>
 
         <div class="nav-right">
-            <div class="theme-toggle" id="themeToggle" title="Toggle theme" role="button" tabindex="0">
-                <span class="toggle-icon-sun">☀️</span>
-                <span class="toggle-icon-moon">🌙</span>
-                <div class="toggle-thumb"></div>
-            </div>
+
             <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-secondary" title="Logout">🚪 Logout</a>
         </div>
     </nav>
