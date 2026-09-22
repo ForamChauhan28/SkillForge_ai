@@ -75,12 +75,14 @@
         left: 0.75rem;
         width: 2px;
         background-color: var(--border-color);
+        z-index: 0;
     }
     .step-item {
         position: relative;
         padding-bottom: 2rem;
         cursor: pointer;
         transition: opacity 0.2s;
+        z-index: 1;
     }
     .step-item:hover {
         opacity: 0.8;
@@ -243,7 +245,6 @@
         color: var(--accent-secondary);
     }
 
-    /* Drawer */
     .drawer-overlay {
         position: fixed;
         top: 0;
@@ -251,10 +252,11 @@
         right: 0;
         bottom: 0;
         background: rgba(0,0,0,0.5);
-        z-index: 100;
+        z-index: 1500;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s;
+        backdrop-filter: blur(2px);
     }
     .drawer-overlay.active {
         opacity: 1;
@@ -262,20 +264,27 @@
     }
     .drawer {
         position: fixed;
-        top: 0;
-        right: -420px;
-        width: 400px;
-        max-width: 100vw;
-        height: 100vh;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        width: 650px;
+        max-width: 95vw;
+        max-height: 85vh;
         background: var(--bg-primary);
-        box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-        z-index: 101;
-        transition: right 0.3s ease;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        z-index: 9999;
+        border-radius: var(--card-radius);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
     .drawer.active {
-        right: 0;
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, -50%) scale(1);
     }
     .drawer-header {
         padding: 1.5rem;
@@ -283,21 +292,35 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
+        background: var(--bg-secondary);
     }
     .drawer-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin: 0 0 0.5rem 0;
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 0;
+        color: var(--text-primary);
+        line-height: 1.3;
     }
     .drawer-close {
-        background: none;
+        background: var(--bg-tertiary);
         border: none;
         cursor: pointer;
         color: var(--text-secondary);
-        padding: 0.25rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .drawer-close:hover {
+        background: #e2e8f0;
+        color: var(--danger);
+        transform: rotate(90deg);
     }
     .drawer-body {
-        padding: 1.5rem;
+        padding: 2rem 1.5rem;
         overflow-y: auto;
         flex-grow: 1;
     }
@@ -305,29 +328,152 @@
         padding: 1.5rem;
         border-top: 1px solid var(--border-color);
         background: var(--bg-secondary);
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+    }
+    .drawer-body h3 {
+        margin-top: 0;
+        color: var(--text-primary);
+        font-size: 1.15rem;
+        border-bottom: 2px solid var(--accent-primary-light);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+    .drawer-body p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+    }
+    .drawer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 2rem 0;
+    }
+    .drawer-list li {
+        padding: 0.75rem 1rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        margin-bottom: 0.5rem;
+        border-radius: var(--card-radius);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
+        font-size: 0.95rem;
+        cursor: pointer;
+    }
+    .drawer-list li:hover {
+        transform: translateX(4px);
+        border-color: var(--accent-primary);
+        background-color: var(--bg-tertiary);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    /* Topic Chat Styles */
+    .topic-chat-container {
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-radius);
+        background: var(--bg-secondary);
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    .topic-chat-messages {
+        padding: 1rem;
+        max-height: 350px;
+        min-height: 150px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .topic-chat-message {
+        padding: 0.75rem 1rem;
+        border-radius: var(--card-radius);
+        font-size: 0.9rem;
+        line-height: 1.5;
+        max-width: 90%;
+    }
+    .topic-chat-message.user {
+        background: var(--accent-primary);
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+    }
+    .topic-chat-message.ai {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+    }
+    .topic-chat-input-area {
+        display: flex;
+        padding: 0.75rem;
+        background: var(--bg-primary);
+        border-top: 1px solid var(--border-color);
+    }
+    .topic-chat-input-area input {
+        flex-grow: 1;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        margin-right: 0.5rem;
+        outline: none;
+    }
+    .topic-chat-input-area input:focus {
+        border-color: var(--accent-primary);
+    }
+    .topic-chat-input-area button {
+        background: var(--accent-primary);
+        color: white;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .topic-chat-input-area button:hover {
+        opacity: 0.9;
+    }
+    .topic-chat-input-area button:disabled {
+        background: var(--text-tertiary);
+        cursor: not-allowed;
     }
     .resource-link {
         display: flex;
         align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem;
+        gap: 1rem;
+        padding: 1rem;
         border: 1px solid var(--border-color);
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
+        border-radius: var(--card-radius);
+        margin-bottom: 0.75rem;
         text-decoration: none;
         color: var(--text-primary);
-        transition: background 0.2s;
+        transition: all 0.2s;
+        background: var(--bg-primary);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
     .resource-link:hover {
-        background: var(--bg-tertiary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        border-color: var(--accent-primary);
     }
     .resource-type {
-        font-size: 0.7rem;
-        padding: 0.15rem 0.4rem;
-        border-radius: 4px;
-        background: var(--border-color);
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        background: var(--accent-primary-light);
+        color: var(--accent-primary);
+        font-weight: 700;
         text-transform: uppercase;
-        font-weight: bold;
+        letter-spacing: 0.5px;
     }
 
     @media (max-width: 992px) {
@@ -464,8 +610,8 @@
 <div class="drawer" id="topicDrawer">
     <div class="drawer-header">
         <div>
-            <span id="drawerStatusBadge" class="badge" style="background:var(--bg-tertiary); margin-bottom:0.5rem; display:inline-block;">Status</span>
-            <h2 class="drawer-title" id="drawerTitle">Topic Name</h2>
+            <span id="drawerStatusBadge" class="badge" style="background:var(--accent-primary-light); color:var(--accent-primary); margin-bottom:0.75rem; display:inline-block; font-size:0.9rem; padding: 6px 12px;">Topic Details</span>
+            <h2 class="drawer-title" id="drawerTitle" style="font-size: 1.8rem;">Topic Name</h2>
         </div>
         <button class="drawer-close" onclick="closeDrawer()">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -486,6 +632,66 @@
 <script>
     let currentNodeId = null;
     let currentCardElement = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Move modal to body to avoid z-index stacking context issues
+        const overlay = document.getElementById('drawerOverlay');
+        const drawer = document.getElementById('topicDrawer');
+        if (overlay) document.body.appendChild(overlay);
+        if (drawer) document.body.appendChild(drawer);
+
+        // Check for 100% completion
+        const progressPercent = {{ progress.percentage|default(0) }};
+        if (progressPercent === 100) {
+            if (!localStorage.getItem('roadmap_completed')) {
+                localStorage.setItem('roadmap_completed', 'true');
+                
+                // Add and show Congrats popup
+                const popup = document.createElement('div');
+                popup.id = 'congratsPopup';
+                popup.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:10000; text-align:center; padding: 3rem; background:white; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border-radius:12px; width: 90%; max-width: 500px;';
+                popup.innerHTML = `
+                    <h2 style="font-size: 2.5rem; margin-bottom:1rem;">Congratulations!</h2>
+                    <p style="color: #64748b; font-size: 1.2rem; margin-bottom:2rem;">You've completed your entire roadmap! Amazing work!</p>
+                    <button class="btn btn-primary btn-lg" onclick="document.getElementById('congratsPopup').remove()">Awesome</button>
+                `;
+                document.body.appendChild(popup);
+
+                // Auto-close after 5 seconds
+                setTimeout(() => {
+                    const existingPopup = document.getElementById('congratsPopup');
+                    if (existingPopup) {
+                        existingPopup.remove();
+                    }
+                }, 5000);
+
+                // Shoot confetti
+                if (typeof confetti === 'function') {
+                    const duration = 3000;
+                    const end = Date.now() + duration;
+                    (function frame() {
+                        confetti({
+                            particleCount: 5,
+                            angle: 60,
+                            spread: 55,
+                            origin: { x: 0 },
+                            colors: ['#3b82f6', '#fbbf24', '#4ade80']
+                        });
+                        confetti({
+                            particleCount: 5,
+                            angle: 120,
+                            spread: 55,
+                            origin: { x: 1 },
+                            colors: ['#3b82f6', '#fbbf24', '#4ade80']
+                        });
+                        if (Date.now() < end) requestAnimationFrame(frame);
+                    }());
+                }
+            }
+        } else {
+            localStorage.removeItem('roadmap_completed');
+        }
+    });
 
     function scrollToPhase(id) {
         const el = document.getElementById(id);
@@ -530,25 +736,68 @@
 
         if (drawerData) {
             if (drawerData.definition) {
-                body.innerHTML += `<h3>About</h3><p>${drawerData.definition}</p>`;
+                body.innerHTML += `<h3>About This Topic</h3><p>${drawerData.definition}</p>`;
             }
             if (drawerData.subtopics && drawerData.subtopics.length > 0) {
-                let html = `<h3>Subtopics to Learn</h3><ul>`;
+                let html = `<h3 style="margin-top:1.5rem;">Subtopics to Master</h3>
+                            <p style="margin-bottom: 0.5rem; font-size: 0.85rem;">Click a subtopic to ask the AI about it!</p>
+                            <ul class="drawer-list">`;
                 drawerData.subtopics.forEach(st => {
-                    html += `<li>${st}</li>`;
+                    // Escape quotes for onclick
+                    const safeSt = st.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    html += `<li onclick="askSubtopic('${safeSt}')" title="Ask AI about this"><i class="fas fa-check-circle" style="color:var(--success, #2e7d32); margin-right:0.75rem; font-size:1.1rem;"></i>${st}</li>`;
                 });
                 html += `</ul>`;
                 body.innerHTML += html;
             }
+            
+            // Inject AI Chat Section
+            let chatHistory = localStorage.getItem('chat_' + currentNodeId);
+            let chatMessagesHTML = chatHistory ? chatHistory : `<div class="topic-chat-message ai">Hi! I'm your AI tutor. Ask me anything about ${title}.</div>`;
+
+            let chatHtml = `
+            <h3 style="margin-top:1.5rem;"><i class="fas fa-robot" style="margin-right:0.5rem;"></i>Ask AI</h3>
+            <p style="margin-bottom: 1rem; font-size: 0.85rem;">Have questions about <strong>${title}</strong>? Ask the AI!</p>
+            <div class="topic-chat-container">
+                <div class="topic-chat-messages" id="topicChatMessages">
+                    ${chatMessagesHTML}
+                </div>
+                <div class="topic-chat-input-area">
+                    <input type="text" id="topicChatInput" placeholder="Type your question..." onkeypress="if(event.key === 'Enter') sendTopicMessage()">
+                    <button id="topicChatBtn" onclick="sendTopicMessage()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>`;
+            body.innerHTML += chatHtml;
+            
+            // Scroll chat to bottom initially
+            setTimeout(() => {
+                const messagesDiv = document.getElementById('topicChatMessages');
+                if(messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 50);
+
             if (drawerData.free_resources && drawerData.free_resources.length > 0) {
-                let html = `<h3>Free Resources</h3><div style="display:flex; flex-direction:column; gap:0.5rem;">`;
+                let html = `<h3 style="margin-top:1.5rem;">Free Resources</h3><div style="display:flex; flex-direction:column;">`;
                 drawerData.free_resources.forEach(res => {
-                    const typeLabel = res.url.includes('youtube.com') || res.url.includes('youtu.be') ? 'Video' : 
-                                      res.url.includes('github') ? 'Code' : 'Article';
+                    let typeLabel = 'Article';
+                    let typeIcon = 'fa-book-open';
+                    
+                    if (res.url.includes('youtube.com') || res.url.includes('youtu.be')) {
+                        typeLabel = 'Video';
+                        typeIcon = 'fa-play-circle';
+                    } else if (res.url.includes('github.com')) {
+                        typeLabel = 'Code';
+                        typeIcon = 'fa-code';
+                    }
+
                     html += `
                     <a href="${res.url}" target="_blank" class="resource-link">
-                        <span class="resource-type">${typeLabel}</span>
-                        <span>${res.title}</span>
+                        <span class="resource-type"><i class="fas ${typeIcon}" style="margin-right:4px;"></i> ${typeLabel}</span>
+                        <span style="font-weight:500;">${res.title}</span>
                     </a>`;
                 });
                 html += `</div>`;
@@ -562,6 +811,9 @@
         document.getElementById('drawerOverlay').classList.add('active');
         document.getElementById('topicDrawer').classList.add('active');
         document.body.style.overflow = 'hidden'; // prevent background scrolling
+        
+        // Clear previous topic chat history backend (optional, but keeps context fresh)
+        // We'll let the frontend reset the UI.
     }
 
     function closeDrawer() {
@@ -570,6 +822,75 @@
         document.body.style.overflow = '';
         currentNodeId = null;
         currentCardElement = null;
+    }
+
+    function askSubtopic(subtopic) {
+        const input = document.getElementById('topicChatInput');
+        if (input) {
+            input.value = `Can you explain ${subtopic}?`;
+            sendTopicMessage();
+            // Scroll to chat
+            const chatContainer = document.querySelector('.topic-chat-container');
+            if(chatContainer) chatContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    async function sendTopicMessage() {
+        const input = document.getElementById('topicChatInput');
+        const btn = document.getElementById('topicChatBtn');
+        const messagesDiv = document.getElementById('topicChatMessages');
+        const title = document.getElementById('drawerTitle').innerText;
+        
+        const message = input.value.trim();
+        if (!message) return;
+
+        // Add user message
+        messagesDiv.innerHTML += `<div class="topic-chat-message user">${message}</div>`;
+        input.value = '';
+        input.disabled = true;
+        btn.disabled = true;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        // Add loading indicator
+        const loadingId = 'loading-' + Date.now();
+        messagesDiv.innerHTML += `<div id="${loadingId}" class="topic-chat-message ai"><i class="fas fa-circle-notch fa-spin"></i> Thinking...</div>`;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        
+        // Save state including user message
+        localStorage.setItem('chat_' + currentNodeId, messagesDiv.innerHTML);
+
+        try {
+            const res = await fetch('/api/chat-topic', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic: title, message: message })
+            });
+            const data = await res.json();
+            
+            // Remove loading
+            document.getElementById(loadingId).remove();
+
+            if (data.success) {
+                // simple markdown rendering (bold)
+                let aiResponse = data.response;
+                aiResponse = aiResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                aiResponse = aiResponse.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                aiResponse = aiResponse.replace(/\n/g, '<br>');
+                
+                messagesDiv.innerHTML += `<div class="topic-chat-message ai">${aiResponse}</div>`;
+                localStorage.setItem('chat_' + currentNodeId, messagesDiv.innerHTML);
+            } else {
+                messagesDiv.innerHTML += `<div class="topic-chat-message ai" style="color:var(--danger)">Error: ${data.error || 'Failed to get response'}</div>`;
+            }
+        } catch (err) {
+            document.getElementById(loadingId).remove();
+            messagesDiv.innerHTML += `<div class="topic-chat-message ai" style="color:var(--danger)">Network error. Please try again.</div>`;
+        } finally {
+            input.disabled = false;
+            btn.disabled = false;
+            input.focus();
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
     }
 
     async function toggleCurrentNode() {

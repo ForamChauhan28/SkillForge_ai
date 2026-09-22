@@ -328,6 +328,55 @@ def chat_with_mentor(user_message, context):
         return "I'm sorry, I encountered an issue. Please try again in a moment."
 
 
+def chat_about_topic(topic, user_message, context):
+    """Chat specifically about a roadmap topic."""
+    skills = context.get('skills', 'Not provided')
+    dream_job = context.get('dream_job', 'Not specified')
+
+    system_context = (
+        f'You are SkillForge AI Tutor, an expert technical instructor.\n'
+        f'You are currently tutoring a student who is learning to become a {dream_job}.\n'
+        f'The student is asking a question about the topic: "{topic}".\n\n'
+        f'Rules:\n'
+        f'- Keep your answer highly focused on "{topic}".\n'
+        f'- Explain concepts simply and clearly, using analogies if helpful.\n'
+        f'- Keep responses concise (1-3 paragraphs max).\n'
+        f'- Use markdown formatting for readability (bolding key terms).\n'
+        f'- If they ask for code, provide a very brief, practical code snippet.\n\n'
+    )
+
+    prompt = system_context + f'Student: {user_message}\n\nTutor:'
+
+    try:
+        last_error = None
+        for attempt in range(3):
+            try:
+                response = get_client().models.generate_content(
+                    model='gemini-3.5-flash-lite',
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=0.4,
+                    )
+                )
+                return response.text
+            except Exception as e:
+                last_error = e
+                err_str = str(e)
+                if '429' in err_str or 'RESOURCE_EXHAUSTED' in err_str:
+                    break
+                elif '503' in err_str:
+                    time.sleep((attempt + 1) * 2)
+                    continue
+                elif '404' in err_str:
+                    break
+                else:
+                    raise
+        raise last_error or Exception("Model failed")
+    except Exception as e:
+        print(f"Error in topic chat: {e}")
+        return "I'm sorry, I encountered an issue while thinking. Please try again."
+
+
 # ═══════════════════════════════════════════════════
 #  AI Mock Interview Simulator
 # ═══════════════════════════════════════════════════
@@ -372,6 +421,17 @@ def generate_mock_questions(role, company, round_type, user_skills='', num_quest
 
 def evaluate_mock_answer(question, user_answer, category, round_type, role, previous_qa=None):
     """Evaluate a candidate's answer to a mock interview question."""
+    if not user_answer or not user_answer.strip() or user_answer.strip().lower() == "i would like to skip this question.":
+        return {
+            'overall_score': 0.0,
+            'criteria_scores': {},
+            'strengths': [],
+            'improvements': ['No answer provided.'],
+            'missing_points': ['The entire answer is missing.'],
+            'model_answer': 'No answer was provided to evaluate.',
+            'tip': 'Even if you are unsure, try to talk through your thought process.'
+        }
+
     prev_context = ''
     if previous_qa:
         prev_context = '\n--- Previous Q&A Context ---\n'
@@ -424,9 +484,11 @@ def evaluate_mock_answer(question, user_answer, category, round_type, role, prev
     except Exception as e:
         print(f"Error evaluating mock answer: {e}")
         return {
-            'overall_score': 5.0,
-            'strengths': ['Answer was provided'],
+            'overall_score': 0.0,
+            'criteria_scores': {},
+            'strengths': [],
             'improvements': ['Could not evaluate - please try again'],
+            'missing_points': [],
             'model_answer': 'Evaluation failed. Please try again.',
             'tip': 'Try to be specific and structured in your answers.'
         }

@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, render_template, session, request, jsonify, redirect, url_for, flash
 from services.auth_service import login_required
-from services.ai_engine import generate_roadmap, generate_certifications, generate_projects, generate_interview_prep
+from services.ai_engine import generate_roadmap, generate_certifications, generate_projects, generate_interview_prep, chat_about_topic
 from models.profile import get_profile, update_dream_job
 from models.roadmap import create_roadmap, get_latest_roadmap, get_roadmap_nodes, get_progress
 
@@ -208,7 +208,42 @@ def certifications_view():
             cert_data = {}
 
     certifications = cert_data.get('certifications', [])
+    
+    beginner = [c for c in certifications if c.get('difficulty', '').lower() == 'beginner']
+    intermediate = [c for c in certifications if c.get('difficulty', '').lower() == 'intermediate']
+    advanced = [c for c in certifications if c.get('difficulty', '').lower() == 'advanced']
 
     return render_template('certifications.html',
-                           certifications=certifications)
+                           certifications=certifications,
+                           beginner=beginner,
+                           intermediate=intermediate,
+                           advanced=advanced)
+
+
+@roadmap_bp.route('/api/chat-topic', methods=['POST'])
+@login_required
+def api_chat_topic():
+    """Handle chat specific to a roadmap topic."""
+    user_id = session['user_id']
+    data = request.get_json()
+    topic = data.get('topic', '').strip()
+    message = data.get('message', '').strip()
+
+    if not message or not topic:
+        return jsonify({'success': False, 'error': 'Topic and message are required'}), 400
+
+    # Build context from user profile
+    profile = get_profile(user_id)
+    
+    context = {
+        'skills': profile.get('extracted_skills', 'Not uploaded yet') if profile else 'Not uploaded yet',
+        'dream_job': profile.get('dream_job', 'Not set') if profile else 'Not set'
+    }
+
+    ai_response = chat_about_topic(topic, message, context)
+
+    return jsonify({
+        'success': True,
+        'response': ai_response
+    })
 

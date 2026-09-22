@@ -746,7 +746,8 @@
      SCREEN 1: Setup
      ═══════════════════════════════════════════════════ -->
 <div class="setup-screen animate-fadeInUp" id="setupScreen">
-    <div class="setup-card">
+    <!-- Step 1: Configuration -->
+    <div class="setup-card" id="step1Screen">
         <h1>🎙️ AI Mock Interview</h1>
         <p class="setup-subtitle">Practice with a realistic AI interviewer. Get instant feedback and a detailed performance report.</p>
 
@@ -803,10 +804,245 @@
             </div>
         </div>
 
-        <button class="btn-start-interview" id="startBtn" onclick="startInterview()">
-            🚀 Start Mock Interview
+        <div class="form-group">
+            <label>Interview Time Limit</label>
+            <select class="form-select" id="timeLimitInput">
+                <option value="15">15 Minutes</option>
+                <option value="30">30 Minutes</option>
+                <option value="45">45 Minutes</option>
+                <option value="60">1 Hour</option>
+            </select>
+        </div>
+
+        <button class="btn-start-interview" id="nextToStep2Btn" onclick="goToStep(2)">
+            Continue to Description →
         </button>
     </div>
+
+    <!-- Step 2: Description -->
+    <div class="setup-card animate-fadeInUp" id="step2Screen" style="display: none;">
+        <h2 style="margin-bottom: 1rem; color: var(--accent-primary);"><i class="fas fa-lightbulb"></i> Interview Description</h2>
+        <p style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem;">Welcome to the <span id="displayRoleName">Role</span> Interview!</p>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+            This interview evaluates your understanding of the core concepts required for this role. It focuses on problem-solving skills, fundamentals, and your ability to articulate technical concepts clearly. It also assesses your learning mindset and adaptability.
+        </p>
+        <ul style="color: var(--text-secondary); margin-bottom: 2rem; padding-left: 1.5rem; line-height: 1.8;">
+            <li>This Session Includes <strong id="displayQuestionCount">5</strong> questions.</li>
+            <li>It will take approximately <strong id="displayTimeLimit">30</strong> minutes to complete.</li>
+            <li>Please ensure you are in a quiet environment before you begin.</li>
+        </ul>
+
+        <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <h3 style="margin-bottom: 1rem; font-size: 1.1rem;">Candidate Details</h3>
+            <div class="grid grid-2">
+                <div class="form-group">
+                    <label>Name <span style="color:var(--danger)">*</span></label>
+                    <input type="text" class="form-input" id="candidateName" placeholder="Your Name" value="{{ profile.name if profile else '' }}">
+                </div>
+                <div class="form-group">
+                    <label>Email <span style="color:var(--danger)">*</span></label>
+                    <input type="email" class="form-input" id="candidateEmail" placeholder="your.email@example.com" value="{{ profile.email if profile else '' }}">
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="goToStep(1)">← Back</button>
+            <button class="btn btn-primary bg-gradient" style="flex: 2;" onclick="goToStep(3)">Continue</button>
+        </div>
+        <p style="text-align: center; font-size: 0.85rem; color: var(--text-tertiary); margin-top: 1rem;">You'll answer a few eligibility questions before the interview setup.</p>
+    </div>
+
+    <!-- Step 3: Eligibility -->
+    <div class="setup-card animate-fadeInUp" id="step3Screen" style="display: none; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-tertiary); letter-spacing: 1px;">&lt;/&gt; ROLE ASSESSMENT</span>
+            <span style="background: rgba(124, 58, 237, 0.1); color: var(--accent-primary); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600;">Total Questions : 4</span>
+        </div>
+        
+        <h2 style="margin-bottom: 0.5rem;" id="eligibilityRoleName">Role Name</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">Please answer a few quick questions to verify your eligibility for the role.</p>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label style="font-size: 1rem;">1. Are you comfortable with a 6-month internship followed by a full-time role? <span style="color:var(--danger)">*</span></label>
+            <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem;">
+                <label style="font-weight: 400; display: flex; align-items: center; gap: 0.5rem;"><input type="radio" name="q1" value="yes"> Yes</label>
+                <label style="font-weight: 400; display: flex; align-items: center; gap: 0.5rem;"><input type="radio" name="q1" value="no"> No</label>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label style="font-size: 1rem;">2. Are you comfortable working from the office on a full-time basis? <span style="color:var(--danger)">*</span></label>
+            <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem;">
+                <label style="font-weight: 400; display: flex; align-items: center; gap: 0.5rem;"><input type="radio" name="q2" value="yes"> Yes</label>
+                <label style="font-weight: 400; display: flex; align-items: center; gap: 0.5rem;"><input type="radio" name="q2" value="no"> No</label>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label style="font-size: 1rem;">3. How soon can you join? (Please mention the number of days required) <span style="color:var(--danger)">*</span></label>
+            <input type="number" class="form-input" id="joinDays" placeholder="Enter a number" style="margin-top: 0.5rem;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+            <label style="font-size: 1rem;">4. Which university/college did you graduate from or are currently studying at? <span style="color:var(--danger)">*</span></label>
+            <input type="text" class="form-input" id="university" placeholder="Type your answer" style="margin-top: 0.5rem;">
+        </div>
+
+        <div style="background: var(--accent-primary-light); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 0.75rem;">
+            <input type="checkbox" id="confirmTruth" style="margin-top: 0.25rem;">
+            <label for="confirmTruth" style="font-weight: 400; font-size: 0.9rem; color: var(--text-primary); margin: 0; cursor: pointer;">
+                I confirm that all information provided by me is true, complete, accurate, and can be verified through supporting documents, if required.
+            </label>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="goToStep(2)">← Back</button>
+            <button class="btn btn-primary bg-gradient" style="flex: 2;" onclick="verifyEligibility()">Continue →</button>
+        </div>
+    </div>
+
+    <!-- Step 4: Verified -->
+    <div class="setup-card animate-fadeInUp" id="step4Screen" style="display: none; text-align: center; padding: 4rem 2rem;">
+        <div style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--accent-primary); font-weight: 700; font-size: 1.2rem; margin-bottom: 2rem;">
+            <i class="fas fa-robot"></i> AI SCREENING
+        </div>
+        <div style="width: 80px; height: 80px; background: rgba(34, 197, 94, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <i class="fas fa-check-circle" style="color: var(--success); font-size: 3rem;"></i>
+        </div>
+        <h2 style="margin-bottom: 1rem; font-size: 1.8rem;">Eligibility Verified</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2.5rem; max-width: 400px; margin-left: auto; margin-right: auto;">
+            Congratulations! Your qualifications have been reviewed and you are officially eligible to proceed to the next stage.
+        </p>
+        <button class="btn btn-primary bg-gradient" style="width: 100%; max-width: 300px; padding: 1rem;" onclick="goToStep(5)">Proceed to Interview Set up</button>
+    </div>
+
+<!-- Screen Sharing Instructions Modal -->
+<div id="screenShareModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);">
+            <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-primary);">Screen Sharing Instructions</h3>
+            <button onclick="document.getElementById('screenShareModal').style.display='none'" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-tertiary);">&times;</button>
+        </div>
+        <div style="padding: 1.5rem; background: var(--bg-secondary);">
+            <div style="background: #1e293b; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: white; text-align: center; font-size: 0.85rem; border: 1px solid #334155;">
+                <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem;">
+                    <span style="color: #94a3b8;">Chrome Tab</span>
+                    <span style="color: #94a3b8;">Window</span>
+                    <span style="color: white; border-bottom: 2px solid var(--accent-primary); padding-bottom: 0.5rem;">Entire Screen</span>
+                </div>
+                <div style="background: #334155; width: 200px; height: 120px; margin: 0 auto 1rem; border-radius: 4px; border: 2px solid var(--accent-primary);"></div>
+                <div style="display: flex; justify-content: flex-start; align-items: center; gap: 0.5rem; background: #0f172a; padding: 0.5rem; border-radius: 4px; width: fit-content; margin: 0 auto;">
+                    <i class="fas fa-volume-up"></i> Also share system audio
+                    <div style="width: 24px; height: 12px; background: var(--accent-primary); border-radius: 12px; position: relative; margin-left: 0.5rem;"><div style="width: 10px; height: 10px; background: white; border-radius: 50%; position: absolute; right: 1px; top: 1px;"></div></div>
+                </div>
+            </div>
+            
+            <h4 style="margin: 0 0 1rem 0; font-size: 0.95rem;">When the browser dialog appears :</h4>
+            
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <div style="width: 24px; height: 24px; background: #1e1b4b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; flex-shrink: 0;">1</div>
+                <div>
+                    <h5 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">Select Entire Screen</h5>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Click the "Entire Screen" tab in the sharing dialog.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 1rem; background: rgba(124, 58, 237, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(124, 58, 237, 0.1);">
+                <div style="width: 24px; height: 24px; background: #1e1b4b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; flex-shrink: 0;">2</div>
+                <div>
+                    <h5 style="margin: 0 0 0.25rem 0; font-size: 0.95rem; color: #1e1b4b;">Share system audio</h5>
+                    <p style="margin: 0 0 0.5rem 0; font-size: 0.85rem; color: #1e1b4b;">Enable toggle labeled "Also share system audio" at the bottom left of the sharing window</p>
+                    <div style="color: var(--danger); font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem;"><i class="fas fa-exclamation-circle"></i> Windows only. Not available on Mac or Linux</div>
+                </div>
+            </div>
+        </div>
+        <div style="padding: 1rem 1.5rem; background: white; border-top: 1px solid var(--border-color);">
+            <button class="btn btn-primary bg-gradient" style="width: 100%; padding: 0.8rem;" onclick="startScreenShare()">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Photo Capture Modal -->
+<div id="cameraModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; animation: fadeInUp 0.3s ease-out; padding: 1.5rem;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem; color: var(--text-primary);">Profile Photo Capture</h3>
+            <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">Take a photo to continue with your interview</p>
+        </div>
+        
+        <div style="background: #000; border-radius: 12px; overflow: hidden; position: relative; margin-bottom: 1.5rem; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;">
+            <video id="captureVideo" autoplay muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <canvas id="captureCanvas" style="display: none; width: 100%; height: 100%; object-fit: cover;"></canvas>
+        </div>
+        
+        <div style="display: flex; gap: 1rem;">
+            <button id="btnCapture" class="btn btn-primary bg-gradient" style="flex: 1; padding: 0.8rem;" onclick="capturePhoto()">Capture</button>
+            <button id="btnRecapture" class="btn" style="flex: 1; padding: 0.8rem; display: none; background: #cbd5e1; color: #334155;" onclick="recapturePhoto()">Recapture</button>
+            <button id="btnUpload" class="btn btn-secondary" style="flex: 1; padding: 0.8rem;" disabled onclick="uploadPhoto()">Upload</button>
+        </div>
+    </div>
+</div>
+
+<!-- Step 5: Instructions -->
+<div class="setup-card animate-fadeInUp" id="step5Screen" style="display: none;">
+    <h2 style="text-align: center; margin-bottom: 0.5rem;">Instructions for AI Interview</h2>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 2rem; font-size: 0.95rem;">Read all instructions and check each box before starting your interview.</p>
+    
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Required Steps</h3>
+    
+    <div class="permission-card" onclick="requestScreenShare()" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 1rem; cursor: pointer; transition: var(--transition);">
+        <div style="width: 40px; height: 40px; background: var(--accent-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i class="fas fa-desktop"></i>
+        </div>
+        <div style="flex: 1;">
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem;">System Audio & Screen</h4>
+            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); font-weight: 400;">You must be ready for a full interview experience. (Simulated for this demo)</p>
+        </div>
+        <input type="checkbox" id="checkScreen" style="width: 20px; height: 20px; pointer-events: none;">
+    </div>
+    
+    <div class="permission-card" onclick="requestCamera()" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 1px solid var(--border-color); border-radius: 10px; margin-bottom: 2rem; cursor: pointer; transition: var(--transition);">
+        <div style="width: 40px; height: 40px; background: var(--accent-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <i class="fas fa-video"></i>
+        </div>
+        <div style="flex: 1;">
+            <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem;">Camera & Audio Setup</h4>
+            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); font-weight: 400;">Ensure your face is clearly visible and centered. Keep your microphone on so the AI interviewer can hear you.</p>
+        </div>
+        <input type="checkbox" id="checkCamera" style="width: 20px; height: 20px; pointer-events: none;">
+    </div>
+
+        <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">Instructions</h3>
+        
+        <ul style="list-style: none; padding: 0; margin: 0; margin-bottom: 2rem;">
+            <li style="display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: flex-start;">
+                <i class="fas fa-info-circle" style="color: var(--accent-primary); margin-top: 0.25rem;"></i>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">Identity Verification:</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Your webcam will capture a photo for verification before starting the interview.</p>
+                </div>
+            </li>
+            <li style="display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: flex-start;">
+                <i class="fas fa-info-circle" style="color: var(--accent-primary); margin-top: 0.25rem;"></i>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">Activity Monitoring:</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Avoid switching tabs or minimizing your window. Any suspicious activity may end your interview automatically.</p>
+                </div>
+            </li>
+            <li style="display: flex; gap: 0.75rem; margin-bottom: 1rem; align-items: flex-start;">
+                <i class="fas fa-info-circle" style="color: var(--accent-primary); margin-top: 0.25rem;"></i>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem 0; font-size: 0.95rem;">Interview Environment Rules:</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Find a quiet, well-lit place. Maintain steady eye contact and respond naturally for best results.</p>
+                </div>
+            </li>
+        </ul>
+
+        <div style="display: flex; gap: 1rem;">
+            <button class="btn btn-secondary" style="flex: 1;" onclick="goToStep(1)">Cancel</button>
+            <button class="btn btn-primary bg-gradient" style="flex: 2;" id="finalStartBtn" disabled onclick="requestHardwareAndStart()">Start Interview</button>
+        </div>
 
     {% if past_sessions %}
     <div class="past-sessions">
@@ -839,76 +1075,158 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════
-     SCREEN 2: Simulator
+     SCREEN 2: Simulator (Redesign)
      ═══════════════════════════════════════════════════ -->
-<div class="simulator-screen" id="simulatorScreen">
-    <div class="sim-header">
-        <div class="sim-header-left">
-            <h2 id="simTitle">Mock Interview</h2>
-            <div class="sim-meta" id="simMeta"></div>
+<div class="simulator-screen" id="simulatorScreen" style="display: none; padding: 2rem; max-width: 1400px; margin: 0 auto; min-height: 85vh;">
+    
+    <!-- Top Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: white; padding: 1rem 2rem; border-radius: 12px; border: 1px solid var(--border-color);">
+        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent-primary); font-weight: bold; font-size: 1.2rem;">
+            <i class="fas fa-robot"></i> AI SCREENING
         </div>
-        <div style="display:flex; align-items:center; gap:1rem;">
-            <span id="progressText" style="font-size:0.9rem; color:var(--text-tertiary);"></span>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="progressBar" style="width: 0%"></div>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <div style="color: var(--danger); border: 1px solid var(--danger); padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.9rem; font-weight: 500;">
+                Tab Switched: <span id="tabSwitchCount">0</span>
+            </div>
+            <div style="font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="far fa-clock"></i> <span id="timerDisplay">00:00</span>
             </div>
         </div>
     </div>
 
-    <!-- Question Card -->
-    <div class="question-card" id="questionCard">
-        <div class="q-number-row">
-            <span class="q-number" id="qNumber">Question 1 of 5</span>
-            <div class="q-badges-sim" id="qBadges"></div>
-        </div>
-        <div class="q-text-sim" id="qText"></div>
-    </div>
-
-    <!-- Answer Area -->
-    <div class="answer-area" id="answerArea">
-        <label>Your Answer <span class="label-hint">— type or use the microphone</span></label>
-        <textarea class="answer-textarea" id="answerInput" placeholder="Type your answer here, or click the microphone button to speak..."></textarea>
-        <div class="answer-controls">
-            <div class="voice-controls">
-                <button class="btn-mic" id="micBtn" onclick="toggleMic()" title="Click to speak">🎤</button>
-                <span class="mic-status" id="micStatus">Click mic to speak</span>
+    <!-- Main Content Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        
+        <!-- Left Column: Webcam & Tips -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <h3 style="margin: 0; font-size: 1.3rem;">Interview</h3>
+            
+            <div style="background: #e2e8f0; border-radius: 12px; overflow: hidden; position: relative; aspect-ratio: 16/9; border: 1px solid var(--border-color);">
+                <video id="simWebcam" autoplay muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+                <div style="position: absolute; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.5); color: white; padding: 0.35rem 1rem; border-radius: 16px; font-size: 0.85rem; backdrop-filter: blur(4px);">
+                    Candidate
+                </div>
             </div>
-            <div style="display:flex; gap:0.75rem;">
-                <button class="btn-skip" onclick="skipQuestion()">Skip →</button>
-                <button class="btn-submit-answer" id="submitBtn" onclick="submitAnswer()">
-                    Submit Answer ✓
-                </button>
+            
+            <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; color: #d97706; font-weight: 600; font-size: 1.1rem;">
+                    <i class="far fa-lightbulb"></i> Interview Tips:
+                </div>
+                <ul style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin: 0; padding-left: 1.5rem; font-size: 0.9rem; color: var(--text-secondary); line-height: 1.4;">
+                    <li>Speak clearly and maintain eye contact</li>
+                    <li>Take your time to think before answering</li>
+                    <li>Use specific examples when possible</li>
+                    <li>Ensure a Clear, Stable Background</li>
+                </ul>
+                <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-secondary); border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <i class="far fa-question-circle"></i> Need Help? Contact Support at <b style="color: var(--accent-primary);">+91 7862063131</b>
+                </div>
             </div>
         </div>
-    </div>
+        
+        <!-- Right Column: Chat & Controls -->
+        <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; height: 100%;">
+            
+            <!-- Chat Header -->
+            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; font-size: 1.1rem;" id="qNumber">Question 1 of 5</h3>
+                <span style="font-size: 0.85rem; color: var(--text-tertiary);" id="currentTimeDisplay">--:--</span>
+            </div>
+            
+            <!-- Chat Messages Area -->
+            <div style="flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; min-height: 400px;" id="chatArea">
+                <!-- AI Question Bubble -->
+                <div style="display: flex; gap: 1rem; max-width: 85%;">
+                    <div style="width: 32px; height: 32px; background: #1e1b4b; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; flex-shrink: 0;">AI</div>
+                    <div style="background: #f1f5f9; padding: 1rem 1.25rem; border-radius: 0 12px 12px 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                        <p style="margin: 0; font-size: 0.95rem; color: #1e293b; line-height: 1.6;" id="qText">Loading question...</p>
+                        <div style="text-align: right; margin-top: 0.5rem; font-size: 0.75rem; color: #94a3b8;" id="aiTimestamp">--:--</div>
+                    </div>
+                </div>
+                
+                <!-- Candidate Answer Bubble (Hidden initially) -->
+                <div id="candidateAnswerBubble" style="display: none; gap: 1rem; max-width: 85%; align-self: flex-end;">
+                    <div style="background: var(--accent-primary); color: white; padding: 1rem 1.25rem; border-radius: 12px 0 12px 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <p style="margin: 0; font-size: 0.95rem; line-height: 1.6;" id="candidateTranscriptText">...</p>
+                    </div>
+                    <div style="width: 32px; height: 32px; background: #94a3b8; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0;"><i class="fas fa-user"></i></div>
+                </div>
+            </div>
+            
+            <textarea id="answerInput" style="display: none;"></textarea>
 
-    <!-- Feedback Panel (hidden until answer submitted) -->
-    <div class="feedback-panel" id="feedbackPanel">
-        <div class="feedback-score-row">
-            <div class="feedback-score-circle" id="feedbackScore"></div>
-            <div class="feedback-tip" id="feedbackTip"></div>
+            <!-- Controls -->
+            <div style="padding: 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <button class="btn" style="border: 1px solid #ef4444; color: #ef4444; background: white; padding: 0.6rem 1.5rem; font-weight: 500;" onclick="endInterviewEarly()">End Interview</button>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <span id="recordingIndicator" style="display: none; color: #ef4444; font-size: 0.9rem; font-weight: 600; align-items: center; gap: 0.5rem;"><span style="display: inline-block; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite;"></span> Recording...</span>
+                    <button class="btn btn-primary bg-gradient" style="background: #1e1b4b; border-color: #1e1b4b; padding: 0.75rem 2rem; font-weight: 500;" id="btnRecording" onclick="toggleRecording()">Start Recording</button>
+                </div>
+            </div>
         </div>
-
-        <div class="feedback-section" id="feedbackStrengths">
-            <h4 class="strengths-title">✅ Strengths</h4>
-            <ul id="strengthsList"></ul>
-        </div>
-
-        <div class="feedback-section" id="feedbackImprovements">
-            <h4 class="improve-title">⚡ Areas to Improve</h4>
-            <ul id="improvementsList"></ul>
-        </div>
-
-        <div class="feedback-section">
-            <h4 class="model-title">💡 Model Answer</h4>
-            <div class="feedback-model-answer" id="modelAnswer"></div>
-        </div>
-
-        <button class="btn-next-question" id="nextBtn" onclick="nextQuestion()">
-            Next Question →
-        </button>
     </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN 3: Thank You
+     ═══════════════════════════════════════════════════ -->
+<div class="thank-you-screen" id="thankYouScreen" style="display: none; min-height: 80vh; align-items: center; justify-content: center; background: #f8fafc;">
+    <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 3rem; max-width: 600px; width: 90%; text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: var(--accent-primary); font-weight: bold; font-size: 1.2rem; margin-bottom: 2rem;">
+            <i class="fas fa-robot"></i> AI SCREENING
+        </div>
+        
+        <h2 style="font-size: 2rem; color: #0f172a; margin-bottom: 1rem;">Thank You for Your Time!</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.6;">We appreciate your effort and the insights you shared during this interview.</p>
+        
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 8px; color: var(--accent-primary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 2.5rem;">
+            Your responses have been submitted successfully. Our team will review your interview and get back to you soon.
+        </div>
+        
+        <h3 style="font-size: 1.2rem; color: #0f172a; margin-bottom: 0.5rem;">We'd love your feedback!</h3>
+        <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 2rem;">Tell us about your experience so we can make future interviews even better.</p>
+        
+        <button class="btn btn-primary" style="background: #1e1b4b; border-color: #1e1b4b; width: 100%; padding: 1rem; font-size: 1rem;" onclick="showFeedbackScreen()">Provide Feedback</button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     SCREEN 4: Feedback
+     ═══════════════════════════════════════════════════ -->
+<div class="feedback-screen" id="feedbackScreen" style="display: none; min-height: 80vh; align-items: center; justify-content: center; background: #f8fafc;">
+    <div style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 3rem; max-width: 600px; width: 90%; text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; color: var(--accent-primary); font-weight: bold; font-size: 1.2rem; margin-bottom: 1.5rem;">
+            <i class="fas fa-robot"></i> AI SCREENING
+        </div>
+        
+        <h2 style="font-size: 1.8rem; color: #0f172a; margin-bottom: 0.5rem;">We'd love your feedback!</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Your thoughts help us improve future interviews.</p>
+        
+        <div style="text-align: left; margin-bottom: 2rem; border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px;">
+            <h4 style="margin: 0 0 1.5rem 0; font-size: 1.05rem; color: #1e293b;">How was your overall interview experience?</h4>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; padding: 0 1rem;">
+                <i class="far fa-angry rating-face" style="font-size: 2.5rem; color: #cbd5e1; cursor: pointer; transition: 0.2s;" onclick="selectRating(this, 1)"></i>
+                <i class="far fa-frown rating-face" style="font-size: 2.5rem; color: #cbd5e1; cursor: pointer; transition: 0.2s;" onclick="selectRating(this, 2)"></i>
+                <i class="far fa-meh rating-face" style="font-size: 2.5rem; color: #cbd5e1; cursor: pointer; transition: 0.2s;" onclick="selectRating(this, 3)"></i>
+                <i class="far fa-smile rating-face" style="font-size: 2.5rem; color: #cbd5e1; cursor: pointer; transition: 0.2s;" onclick="selectRating(this, 4)"></i>
+                <i class="far fa-laugh-beam rating-face" style="font-size: 2.5rem; color: #cbd5e1; cursor: pointer; transition: 0.2s;" onclick="selectRating(this, 5)"></i>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-tertiary); padding: 0 0.5rem;">
+                <span>Needs Improvement</span>
+                <span>Excellent</span>
+            </div>
+        </div>
+        
+        <div style="text-align: left; margin-bottom: 2rem;">
+            <h4 style="margin: 0 0 0.75rem 0; font-size: 1.05rem; color: #1e293b;">Tell us a bit more about your experience</h4>
+            <textarea id="feedbackText" placeholder="What did you like about the interview process? Any suggestions for improvement?" style="width: 100%; height: 120px; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; resize: none; font-family: inherit; font-size: 0.95rem;"></textarea>
+        </div>
+        
+        <button class="btn" style="background: #cbd5e1; color: white; border: none; width: 100%; padding: 1rem; font-size: 1rem; margin-bottom: 0.5rem; cursor: pointer;" id="submitFeedbackBtn" disabled onclick="submitFeedback()">Submit Feedback</button>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-tertiary);">Thank you for helping us improve your experience!</p>
+    </div>
+</div>
+
 
 <!-- ═══════════════════════════════════════════════════
      SCREEN 3: Report
@@ -952,6 +1270,102 @@
 {% block extra_js %}
 <script>
 // ═══════════════════════════════════════════════════
+//  Utilities
+// ═══════════════════════════════════════════════════
+function showCustomError(message) {
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '10000';
+    toast.style.background = '#fff';
+    toast.style.borderLeft = '4px solid #f87171'; // danger red
+    toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+    toast.style.padding = '1rem 1.5rem';
+    toast.style.borderRadius = '8px';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'flex-start'; // Better for multi-line
+    toast.style.gap = '12px';
+    toast.style.color = '#1e293b';
+    toast.style.fontWeight = '500';
+    toast.style.transform = 'translateX(120%)';
+    toast.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    toast.style.maxWidth = '400px';
+    
+    toast.innerHTML = `<i class="fas fa-exclamation-circle" style="color: #f87171; font-size: 1.2rem; margin-top: 3px;"></i> <span style="line-height: 1.4;">${message}</span>`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 10);
+    setTimeout(() => {
+        toast.style.transform = 'translateX(120%)';
+        setTimeout(() => toast.remove(), 400);
+    }, 3500);
+}
+
+function showCustomSuccess(message) {
+    const toast = document.createElement('div');
+    toast.style.position = 'fixed';
+    toast.style.top = '20px';
+    toast.style.right = '20px';
+    toast.style.zIndex = '10000';
+    toast.style.background = '#fff';
+    toast.style.borderLeft = '4px solid #4ade80'; // success green
+    toast.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+    toast.style.padding = '1rem 1.5rem';
+    toast.style.borderRadius = '8px';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'flex-start';
+    toast.style.gap = '12px';
+    toast.style.color = '#1e293b';
+    toast.style.fontWeight = '500';
+    toast.style.transform = 'translateX(120%)';
+    toast.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    toast.style.maxWidth = '400px';
+    
+    toast.innerHTML = `<i class="fas fa-check-circle" style="color: #4ade80; font-size: 1.2rem; margin-top: 3px;"></i> <span style="line-height: 1.4;">${message}</span>`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 10);
+    setTimeout(() => {
+        toast.style.transform = 'translateX(120%)';
+        setTimeout(() => toast.remove(), 400);
+    }, 3500);
+}
+
+// ═══════════════════════════════════════════════════
+//  Screen Management
+// ═══════════════════════════════════════════════════
+function showScreen(screenId) {
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('simLoading').style.display = 'none';
+    document.getElementById('simulatorScreen').style.display = 'none';
+    document.getElementById('thankYouScreen').style.display = 'none';
+    document.getElementById('feedbackScreen').style.display = 'none';
+    document.getElementById('reportScreen').style.display = 'none';
+    
+    if (screenId === 'setup') document.getElementById('setupScreen').style.display = 'block';
+    if (screenId === 'loading') document.getElementById('simLoading').style.display = 'flex';
+    if (screenId === 'simulator') document.getElementById('simulatorScreen').style.display = 'block';
+    if (screenId === 'thankYou') document.getElementById('thankYouScreen').style.display = 'flex';
+    if (screenId === 'feedback') document.getElementById('feedbackScreen').style.display = 'flex';
+    if (screenId === 'report') document.getElementById('reportScreen').style.display = 'block';
+}
+
+let interviewTimer = null;
+let secondsElapsed = 0;
+function startInterviewTimer() {
+    if (interviewTimer) clearInterval(interviewTimer);
+    secondsElapsed = 0;
+    interviewTimer = setInterval(() => {
+        secondsElapsed++;
+        const mins = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+        const secs = (secondsElapsed % 60).toString().padStart(2, '0');
+        const timerEl = document.getElementById('timerDisplay');
+        if (timerEl) timerEl.innerText = `${mins}:${secs}`;
+    }, 1000);
+}
+
+// ═══════════════════════════════════════════════════
 //  State Management
 // ═══════════════════════════════════════════════════
 let state = {
@@ -991,26 +1405,27 @@ if (slider) {
 async function startInterview() {
     const role = document.getElementById('roleInput').value.trim();
     if (!role) {
-        alert('Please enter a target role.');
+        showCustomError('Please enter a target role.');
         return;
     }
 
     const company = document.getElementById('companyInput').value;
     const roundType = document.querySelector('.round-card.selected')?.dataset.round || 'technical_r1';
     const numQuestions = parseInt(document.getElementById('questionCount').value);
+    const timeLimit = document.getElementById('timeLimitInput')?.value || '30';
 
     // Show loading
     showScreen('loading');
     document.getElementById('loadingMessage').textContent = 'Generating tailored interview questions for you...';
 
-    const startBtn = document.getElementById('startBtn');
-    startBtn.disabled = true;
+    const startBtn = document.getElementById('startBtn') || document.getElementById('finalStartBtn');
+    if (startBtn) startBtn.disabled = true;
 
     try {
         const res = await fetch('/api/mock-interview/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role, company, round_type: roundType, num_questions: numQuestions })
+            body: JSON.stringify({ role, company, round_type: roundType, num_questions: numQuestions, time_limit: timeLimit })
         });
 
         const data = await res.json();
@@ -1024,6 +1439,8 @@ async function startInterview() {
         state.totalQuestions = data.total_questions;
         state.currentIndex = 0;
         state.currentQuestion = data.question;
+
+        startInterviewTimer();
 
         // Update simulator header
         document.getElementById('simTitle').textContent = `${role} Interview`;
@@ -1040,10 +1457,10 @@ async function startInterview() {
         showScreen('simulator');
 
     } catch (err) {
-        alert('Error: ' + err.message);
+        showCustomError('Error: ' + err.message);
         showScreen('setup');
     } finally {
-        startBtn.disabled = false;
+        if (startBtn) startBtn.disabled = false;
     }
 }
 
@@ -1053,26 +1470,28 @@ async function startInterview() {
 function renderQuestion(q, index, total) {
     document.getElementById('qNumber').textContent = `Question ${index + 1} of ${total}`;
     document.getElementById('qText').textContent = q.text;
-    document.getElementById('progressText').textContent = `${index + 1}/${total}`;
-
-    const pct = ((index) / total) * 100;
-    document.getElementById('progressBar').style.width = pct + '%';
-
-    // Badges
-    const badgesEl = document.getElementById('qBadges');
-    badgesEl.innerHTML = '';
-    if (q.category) {
-        badgesEl.innerHTML += `<span class="badge-sim badge-cat-${q.category}">${q.category}</span>`;
-    }
-    if (q.difficulty) {
-        badgesEl.innerHTML += `<span class="badge-sim badge-diff-${q.difficulty}">${q.difficulty}</span>`;
-    }
-
-    // Reset answer area
+    
+    // Set current time for AI timestamp
+    const now = new Date();
+    document.getElementById('currentTimeDisplay').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('aiTimestamp').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    // Reset candidate answer bubble
+    document.getElementById('candidateAnswerBubble').style.display = 'none';
+    document.getElementById('candidateTranscriptText').textContent = '...';
     document.getElementById('answerInput').value = '';
-    document.getElementById('answerArea').style.display = 'block';
-    document.getElementById('feedbackPanel').style.display = 'none';
-    document.getElementById('answerInput').focus();
+    
+    // Ensure button is in Start Recording state
+    state.isRecording = false;
+    const btn = document.getElementById('btnRecording');
+    if (btn) {
+        btn.innerText = 'Start Recording';
+        btn.style.background = '#1e1b4b';
+        btn.style.borderColor = '#1e1b4b';
+        btn.classList.remove('pulse-recording');
+    }
+    const recIndicator = document.getElementById('recordingIndicator');
+    if (recIndicator) recIndicator.style.display = 'none';
 
     state.currentQuestion = q;
     state.currentIndex = index;
@@ -1082,21 +1501,27 @@ function renderQuestion(q, index, total) {
 //  Submit Answer
 // ═══════════════════════════════════════════════════
 async function submitAnswer() {
-    const answer = document.getElementById('answerInput').value.trim();
-    if (!answer) {
-        alert('Please type or speak your answer before submitting.');
+    const answer = document.getElementById('answerInput').value.trim() || document.getElementById('candidateTranscriptText').textContent.trim();
+    if (!answer || answer === '...' || answer === 'Listening...') {
+        showCustomError('Please record your answer before submitting.');
         return;
     }
 
     if (state.isSubmitting) return;
     state.isSubmitting = true;
 
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-sim" style="width:20px;height:20px;border-width:2px;display:inline-block;vertical-align:middle;margin:0;"></span> Evaluating...';
+    // Update bubble to show submitting
+    document.getElementById('candidateTranscriptText').textContent = answer;
+    document.getElementById('candidateAnswerBubble').style.display = 'flex';
+
+    const btn = document.getElementById('btnRecording');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Submitting...';
+    }
 
     // Stop recording if active
-    if (state.isRecording) toggleMic();
+    if (state.isRecording) stopRecording();
 
     try {
         const res = await fetch('/api/mock-interview/answer', {
@@ -1115,96 +1540,68 @@ async function submitAnswer() {
             throw new Error(data.error || 'Failed to evaluate answer');
         }
 
-        // Show feedback
-        renderFeedback(data.feedback, data.score, data.is_last_question);
-
-        // Store next question info
-        if (data.next_question) {
+        if (data.is_last_question) {
+            showScreen('thankYou');
+        } else {
             state.nextQuestion = data.next_question;
+            state.currentIndex = data.next_question.index;
+            renderQuestion(data.next_question, state.currentIndex, state.totalQuestions);
         }
-        state.isLastQuestion = data.is_last_question;
-
-        // Hide answer area, show feedback
-        document.getElementById('answerArea').style.display = 'none';
-        document.getElementById('feedbackPanel').style.display = 'block';
 
     } catch (err) {
-        alert('Error: ' + err.message);
+        showCustomError('Error: ' + err.message);
+        if (btn) btn.innerText = 'Start Recording';
     } finally {
         state.isSubmitting = false;
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Submit Answer ✓';
+        if (btn) btn.disabled = false;
     }
 }
 
 // ═══════════════════════════════════════════════════
 //  Skip Question
 // ═══════════════════════════════════════════════════
-async function skipQuestion() {
+function skipQuestion() {
     document.getElementById('answerInput').value = 'I would like to skip this question.';
-    await submitAnswer();
+    submitAnswer();
 }
 
 // ═══════════════════════════════════════════════════
-//  Render Feedback
+//  New Flow Helpers
 // ═══════════════════════════════════════════════════
-function renderFeedback(feedback, score, isLast) {
-    // Score circle
-    const scoreEl = document.getElementById('feedbackScore');
-    const scoreVal = parseFloat(score) || 0;
-    scoreEl.textContent = scoreVal.toFixed(1);
-    scoreEl.className = 'feedback-score-circle';
-    if (scoreVal >= 7) scoreEl.classList.add('score-good');
-    else if (scoreVal >= 5) scoreEl.classList.add('score-okay');
-    else scoreEl.classList.add('score-low');
-
-    // Tip
-    document.getElementById('feedbackTip').textContent = feedback.tip || 'Keep practicing!';
-
-    // Strengths
-    const strengthsList = document.getElementById('strengthsList');
-    strengthsList.innerHTML = '';
-    (feedback.strengths || []).forEach(s => {
-        const li = document.createElement('li');
-        li.textContent = s;
-        strengthsList.appendChild(li);
-    });
-
-    // Improvements
-    const improvementsList = document.getElementById('improvementsList');
-    improvementsList.innerHTML = '';
-    const improvements = [...(feedback.improvements || []), ...(feedback.missing_points || [])];
-    improvements.forEach(s => {
-        const li = document.createElement('li');
-        li.textContent = s;
-        improvementsList.appendChild(li);
-    });
-
-    // Model answer
-    document.getElementById('modelAnswer').textContent = feedback.model_answer || '';
-
-    // Next button
-    const nextBtn = document.getElementById('nextBtn');
-    if (isLast) {
-        nextBtn.textContent = '📊 View Performance Report';
-        nextBtn.onclick = viewReport;
-    } else {
-        nextBtn.textContent = 'Next Question →';
-        nextBtn.onclick = nextQuestion;
-    }
-
-    // Update progress bar
-    const pct = ((state.currentIndex + 1) / state.totalQuestions) * 100;
-    document.getElementById('progressBar').style.width = pct + '%';
+function endInterviewEarly() {
+    showScreen('thankYou');
 }
 
-// ═══════════════════════════════════════════════════
-//  Next Question
-// ═══════════════════════════════════════════════════
-function nextQuestion() {
-    if (state.nextQuestion) {
-        renderQuestion(state.nextQuestion, state.nextQuestion.index, state.totalQuestions);
+function showFeedbackScreen() {
+    showScreen('feedback');
+}
+
+let selectedFeedbackRating = 0;
+function selectRating(element, rating) {
+    selectedFeedbackRating = rating;
+    const faces = document.querySelectorAll('.rating-face');
+    faces.forEach(f => {
+        f.style.color = '#cbd5e1';
+        f.style.transform = 'scale(1)';
+    });
+    element.style.color = '#1e1b4b';
+    element.style.transform = 'scale(1.2)';
+    
+    const submitBtn = document.getElementById('submitFeedbackBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.background = '#1e1b4b';
     }
+}
+
+async function submitFeedback() {
+    const btn = document.getElementById('submitFeedbackBtn');
+    if (btn) {
+        btn.innerText = 'Loading Report...';
+        btn.disabled = true;
+    }
+    
+    await viewReport();
 }
 
 // ═══════════════════════════════════════════════════
@@ -1223,7 +1620,7 @@ async function viewReport() {
         renderReport(data.report);
         showScreen('report');
     } catch (err) {
-        alert('Error: ' + err.message);
+        showCustomError('Error: ' + err.message);
         showScreen('simulator');
     }
 }
@@ -1361,7 +1758,7 @@ function toggleMic() {
     if (!state.recognition) {
         initSpeechRecognition();
         if (!state.recognition) {
-            alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+            showCustomError('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
             return;
         }
     }
@@ -1411,11 +1808,245 @@ function showScreen(screen) {
     document.getElementById('simulatorScreen').style.display = 'none';
     document.getElementById('reportScreen').style.display = 'none';
 
-    if (screen === 'setup') document.getElementById('setupScreen').style.display = 'block';
+    if (screen === 'setup') {
+        document.getElementById('setupScreen').style.display = 'block';
+        goToStep(1); // Ensure we reset to step 1
+    }
     else if (screen === 'loading') document.getElementById('simLoading').style.display = 'block';
     else if (screen === 'simulator') document.getElementById('simulatorScreen').style.display = 'block';
     else if (screen === 'report') document.getElementById('reportScreen').style.display = 'block';
 }
+
+function goToStep(stepNumber) {
+    document.getElementById('step1Screen').style.display = 'none';
+    document.getElementById('step2Screen').style.display = 'none';
+    document.getElementById('step3Screen').style.display = 'none';
+    document.getElementById('step4Screen').style.display = 'none';
+    document.getElementById('step5Screen').style.display = 'none';
+
+    if (stepNumber === 1) {
+        document.getElementById('step1Screen').style.display = 'block';
+    } else if (stepNumber === 2) {
+        const role = document.getElementById('roleInput').value.trim() || 'General';
+        const count = document.getElementById('questionCount').value;
+        const time = document.getElementById('timeLimitInput').value;
+        
+        document.getElementById('displayRoleName').textContent = role;
+        document.getElementById('displayQuestionCount').textContent = count;
+        document.getElementById('displayTimeLimit').textContent = time;
+        
+        document.getElementById('step2Screen').style.display = 'block';
+    } else if (stepNumber === 3) {
+        const name = document.getElementById('candidateName').value.trim();
+        const email = document.getElementById('candidateEmail').value.trim();
+        if (!name || !email) {
+            showCustomError('Please provide your name and email.');
+            document.getElementById('step2Screen').style.display = 'block';
+            return;
+        }
+        
+        const role = document.getElementById('roleInput').value.trim() || 'General';
+        document.getElementById('eligibilityRoleName').textContent = role;
+        
+        document.getElementById('step3Screen').style.display = 'block';
+    } else if (stepNumber === 4) {
+        document.getElementById('step4Screen').style.display = 'block';
+    } else if (stepNumber === 5) {
+        document.getElementById('step5Screen').style.display = 'block';
+        // Reset permissions when reaching step 5
+        document.getElementById('checkScreen').checked = false;
+        document.getElementById('checkCamera').checked = false;
+        window.localCameraStream = null;
+        window.localScreenStream = null;
+        checkPermissions();
+    }
+}
+
+function verifyEligibility() {
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    const q2 = document.querySelector('input[name="q2"]:checked');
+    const joinDays = document.getElementById('joinDays').value.trim();
+    const university = document.getElementById('university').value.trim();
+    const confirmed = document.getElementById('confirmTruth').checked;
+
+    if (!q1 || !q2 || !joinDays || !university || !confirmed) {
+        showCustomError("Please answer all questions and confirm your information.");
+        return;
+    }
+
+    goToStep(4);
+}
+
+function checkPermissions() {
+    const screenChecked = document.getElementById('checkScreen').checked;
+    const cameraChecked = document.getElementById('checkCamera').checked;
+    const finalStartBtn = document.getElementById('finalStartBtn');
+    
+    if (screenChecked && cameraChecked) {
+        finalStartBtn.disabled = false;
+    } else {
+        finalStartBtn.disabled = true;
+    }
+}
+
+function requestScreenShare() {
+    if (document.getElementById('checkScreen').checked) return; // Already checked
+    document.getElementById('screenShareModal').style.display = 'flex';
+}
+
+async function startScreenShare() {
+    document.getElementById('screenShareModal').style.display = 'none';
+    try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        window.localScreenStream = stream;
+        document.getElementById('checkScreen').checked = true;
+        checkPermissions();
+        
+        // Handle user stopping share from browser UI
+        stream.getVideoTracks()[0].onended = () => {
+            document.getElementById('checkScreen').checked = false;
+            window.localScreenStream = null;
+            checkPermissions();
+        };
+    } catch (err) {
+        showCustomError("Screen sharing permission denied. Please allow it to proceed.");
+    }
+}
+
+async function requestCamera() {
+    if (document.getElementById('checkCamera').checked) return; // Already checked
+    document.getElementById('cameraModal').style.display = 'flex';
+    
+    // Reset modal state
+    document.getElementById('captureVideo').style.display = 'block';
+    document.getElementById('captureCanvas').style.display = 'none';
+    document.getElementById('btnCapture').style.display = 'block';
+    document.getElementById('btnRecapture').style.display = 'none';
+    document.getElementById('btnUpload').disabled = true;
+    document.getElementById('btnUpload').classList.add('btn-secondary');
+    document.getElementById('btnUpload').classList.remove('btn-primary', 'bg-gradient');
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        window.localCameraStream = stream;
+        document.getElementById('captureVideo').srcObject = stream;
+    } catch (err) {
+        document.getElementById('cameraModal').style.display = 'none';
+        showCustomError("Camera/Microphone permission denied. Please allow it to proceed.");
+    }
+}
+
+async function checkFaceDetected(canvas) {
+    // Try native FaceDetector API first (available in some modern browsers behind flags)
+    if ('FaceDetector' in window) {
+        try {
+            const detector = new window.FaceDetector({ maxDetectedFaces: 1 });
+            const faces = await detector.detect(canvas);
+            if (faces.length > 0) return true;
+        } catch (e) {
+            console.log("FaceDetector API error, falling back to heuristic", e);
+        }
+    }
+    
+    // Fallback heuristic: Image variance calculation
+    // A blank wall or covered camera has low variance (stdDev < 20)
+    // A face has much higher variance
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Check center crop to avoid background edges
+    const imageData = ctx.getImageData(width * 0.25, height * 0.25, width * 0.5, height * 0.5);
+    const data = imageData.data;
+    
+    let sum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+        sum += (data[i] + data[i+1] + data[i+2]) / 3;
+    }
+    const mean = sum / (data.length / 4);
+    
+    let varianceSum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+        const gray = (data[i] + data[i+1] + data[i+2]) / 3;
+        varianceSum += Math.pow(gray - mean, 2);
+    }
+    const variance = varianceSum / (data.length / 4);
+    const stdDev = Math.sqrt(variance);
+    
+    console.log("Calculated image standard deviation:", stdDev);
+    return stdDev > 20; 
+}
+
+async function capturePhoto() {
+    const video = document.getElementById('captureVideo');
+    const canvas = document.getElementById('captureCanvas');
+    
+    // Match canvas size to video actual size
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    video.style.display = 'none';
+    canvas.style.display = 'block';
+    
+    document.getElementById('btnCapture').style.display = 'none';
+    document.getElementById('btnRecapture').style.display = 'block';
+    
+    // Determine if face is detected
+    const hasFace = await checkFaceDetected(canvas);
+    
+    const btnUpload = document.getElementById('btnUpload');
+    if (hasFace) {
+        btnUpload.disabled = false;
+        btnUpload.classList.remove('btn-secondary');
+        btnUpload.classList.add('btn-primary', 'bg-gradient');
+        showCustomSuccess("Image captured successfully!");
+    } else {
+        btnUpload.disabled = true;
+        btnUpload.classList.add('btn-secondary');
+        btnUpload.classList.remove('btn-primary', 'bg-gradient');
+        showCustomError("<b style='font-size: 1.05rem;'>Something went wrong. Please try again.</b><br><span style='font-size: 0.9rem;'>We couldn't detect a face in your photo. Please make sure your face is clearly visible and retake the photo.</span>");
+    }
+}
+
+function recapturePhoto() {
+    document.getElementById('captureVideo').style.display = 'block';
+    document.getElementById('captureCanvas').style.display = 'none';
+    
+    document.getElementById('btnCapture').style.display = 'block';
+    document.getElementById('btnRecapture').style.display = 'none';
+    
+    const btnUpload = document.getElementById('btnUpload');
+    btnUpload.disabled = true;
+    btnUpload.classList.add('btn-secondary');
+    btnUpload.classList.remove('btn-primary', 'bg-gradient');
+}
+
+function uploadPhoto() {
+    document.getElementById('cameraModal').style.display = 'none';
+    document.getElementById('checkCamera').checked = true;
+    checkPermissions();
+    showCustomSuccess("Profile photo uploaded successfully!");
+}
+
+async function requestHardwareAndStart() {
+    if (!window.localCameraStream) {
+        showCustomError("Camera stream not found.");
+        return;
+    }
+    
+    // Attach stream to simulator webcam feed
+    const simWebcam = document.getElementById('simWebcam');
+    if (simWebcam) {
+        simWebcam.srcObject = window.localCameraStream;
+    }
+    
+    // Both conditions met, proceed to start interview
+    startInterview();
+}
+
 
 function restartInterview() {
     state = {

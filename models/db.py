@@ -64,7 +64,9 @@ def init_database():
                 user_id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(100) NOT NULL,
                 email VARCHAR(100) NOT NULL UNIQUE,
-                password_hash VARCHAR(255) NOT NULL,
+                password_hash VARCHAR(255) NULL,
+                oauth_provider VARCHAR(50) NULL,
+                oauth_id VARCHAR(255) NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB
         """)
@@ -153,6 +155,9 @@ def init_database():
         migrations = [
             ("user_profiles", "resume_text", "ALTER TABLE user_profiles ADD COLUMN resume_text LONGTEXT AFTER resume_filename"),
             ("user_profiles", "ats_score_json", "ALTER TABLE user_profiles ADD COLUMN ats_score_json TEXT AFTER resume_text"),
+            ("users", "oauth_provider", "ALTER TABLE users ADD COLUMN oauth_provider VARCHAR(50) NULL AFTER password_hash"),
+            ("users", "oauth_id", "ALTER TABLE users ADD COLUMN oauth_id VARCHAR(255) NULL AFTER oauth_provider"),
+            ("users", "password_hash_null", "ALTER TABLE users MODIFY password_hash VARCHAR(255) NULL"),
         ]
 
         for table, column, sql in migrations:

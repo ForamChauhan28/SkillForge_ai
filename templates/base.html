@@ -10,10 +10,12 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 
     <!-- Stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+
 
 
     {% if not hide_nav %}
@@ -47,14 +49,48 @@
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <div class="main-content" style="padding-bottom: 0; margin-bottom: -2rem;">
+        <div class="flash-messages-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; width: 100%; max-width: 350px; padding: 0; pointer-events: none; display: flex; flex-direction: column; gap: 10px;">
             {% for category, message in messages %}
-            <div class="alert alert-{{ category }}" id="flashAlert">
-                {% if category == 'success' %}✅{% elif category == 'danger' %}❌{% elif category == 'warning' %}⚠️{% else %}ℹ️{% endif %}
-                {{ message }}
+            <div class="alert alert-{{ category }} flash-toast" style="pointer-events: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); background: white; border-radius: 8px; border-left: 5px solid {% if category == 'success' %}#4ade80{% elif category == 'danger' %}#f87171{% elif category == 'warning' %}#fbbf24{% else %}#3b82f6{% endif %}; display: flex; align-items: center; justify-content: space-between; padding: 1rem; color: #1e293b; font-weight: 500; animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    {% if category == 'success' %}<i class="fas fa-check-circle" style="color: #4ade80; font-size: 1.2rem;"></i>
+                    {% elif category == 'danger' %}<i class="fas fa-exclamation-circle" style="color: #f87171; font-size: 1.2rem;"></i>
+                    {% elif category == 'warning' %}<i class="fas fa-exclamation-triangle" style="color: #fbbf24; font-size: 1.2rem;"></i>
+                    {% else %}<i class="fas fa-info-circle" style="color: #3b82f6; font-size: 1.2rem;"></i>{% endif %}
+                    <span>{{ message }}</span>
+                </div>
+                <button type="button" class="btn-close" onclick="this.parentElement.style.animation='slideOutRight 0.3s ease-in forwards'; setTimeout(() => this.parentElement.remove(), 300);" style="background: none; border: none; cursor: pointer; color: #94a3b8; font-size: 1.2rem; padding: 0; margin-left: 10px; line-height: 1;"><i class="fas fa-times"></i></button>
             </div>
             {% endfor %}
         </div>
+        
+        <script>
+            // Auto dismiss toasts
+            const toasts = document.querySelectorAll('.flash-toast');
+            toasts.forEach(toast => {
+                const text = toast.innerText.toLowerCase();
+                // 3 seconds for login/logout messages, 5 seconds for others
+                let timeout = 5000;
+                if (text.includes('login') || text.includes('logged out') || text.includes('log in') || text.includes('logged in')) {
+                    timeout = 3000;
+                }
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease-in forwards';
+                    setTimeout(() => toast.remove(), 300);
+                }, timeout);
+            });
+        </script>
+        <style>
+            @keyframes slideInRight {
+                from { transform: translateX(120%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(120%); opacity: 0; }
+            }
+        </style>
         {% endif %}
     {% endwith %}
 
@@ -73,6 +109,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>

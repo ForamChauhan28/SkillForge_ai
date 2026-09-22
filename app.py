@@ -13,6 +13,18 @@ def create_app():
     app.secret_key = Config.SECRET_KEY
     app.config['MAX_CONTENT_LENGTH'] = Config.MAX_CONTENT_LENGTH
 
+    # Initialize OAuth
+    from authlib.integrations.flask_client import OAuth
+    oauth = OAuth(app)
+    app.oauth = oauth
+    oauth.register(
+        name='google',
+        client_id=Config.GOOGLE_CLIENT_ID,
+        client_secret=Config.GOOGLE_CLIENT_SECRET,
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={'scope': 'openid email profile'}
+    )
+
     # Ensure upload folder exists
     upload_path = os.path.join(app.root_path, Config.UPLOAD_FOLDER)
     os.makedirs(upload_path, exist_ok=True)

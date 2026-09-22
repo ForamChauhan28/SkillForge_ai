@@ -4,52 +4,7 @@
 
 {% block extra_css %}
 <style>
-    .tabs-container {
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-    }
-    
-    .tab-btn {
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        padding: 0.75rem 2rem;
-        border-radius: 30px;
-        cursor: pointer;
-        transition: var(--transition);
-        font-weight: 600;
-        font-size: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .tab-btn:hover {
-        border-color: var(--accent-primary);
-    }
-    
-    .tab-btn.active {
-        background: var(--accent-gradient);
-        color: white;
-        border: none;
-        box-shadow: 0 4px 15px rgba(74, 63, 138, 0.3);
-    }
-    
-    .count-badge {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.8rem;
-    }
-    
-    .tab-btn:not(.active) .count-badge {
-        background: var(--bg-tertiary);
-        color: var(--text-secondary);
-    }
-    
+
     .proj-card {
         background: var(--bg-secondary);
         border: 1px solid var(--border-color);
@@ -145,28 +100,20 @@
     
     .proj-details {
         display: none;
-        padding: 1.5rem;
-        background: var(--bg-tertiary);
-        border-top: 1px solid var(--border-color);
-        animation: slideDown 0.3s ease-out;
-    }
-    
-    @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
     }
     
     .details-section {
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
     }
     
     .details-title {
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 1.15rem;
         color: var(--text-primary);
-        margin-bottom: 0.5rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--accent-primary-light);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        display: inline-block;
     }
     
     .outcomes-list, .prereq-list {
@@ -205,6 +152,87 @@
         border: 1px dashed var(--border-color);
         grid-column: 1 / -1;
     }
+
+    /* Drawer Styles */
+    .drawer-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1500;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        backdrop-filter: blur(2px);
+    }
+    .drawer-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .drawer {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95);
+        width: 650px;
+        max-width: 95vw;
+        max-height: 85vh;
+        background: var(--bg-primary);
+        box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+        z-index: 9999;
+        border-radius: var(--card-radius);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    .drawer.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    .drawer-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        background: var(--bg-secondary);
+    }
+    .drawer-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 0;
+        color: var(--text-primary);
+        line-height: 1.3;
+    }
+    .drawer-close {
+        background: var(--bg-tertiary);
+        border: none;
+        cursor: pointer;
+        color: var(--text-secondary);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    .drawer-close:hover {
+        background: #e2e8f0;
+        color: var(--danger);
+        transform: rotate(90deg);
+    }
+    .drawer-body {
+        padding: 2rem 1.5rem;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
 </style>
 {% endblock %}
 
@@ -241,18 +269,24 @@
                     <span class="tier-badge badge-{{ p.tier|lower }}">{{ p.tier }}</span>
                 </div>
                 
-                <p class="proj-desc">{{ p.description }}</p>
-                
-                <div class="tech-stack">
-                    {% for tech in p.tech_stack %}
-                    <span class="tech-pill">{{ tech }}</span>
-                    {% endfor %}
-                </div>
-                
                 <button class="btn btn-secondary toggle-details-btn">View Details</button>
             </div>
             
             <div class="proj-details">
+                <div class="details-section">
+                    <div class="details-title">About this Project</div>
+                    <p style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem;">{{ p.description }}</p>
+                </div>
+
+                <div class="details-section">
+                    <div class="details-title">Tools & Technologies</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        {% for tech in p.tech_stack %}
+                        <span style="background: var(--bg-tertiary); color: var(--text-primary); font-size: 0.85rem; padding: 0.3rem 0.8rem; border-radius: 15px; border: 1px solid var(--border-color);">{{ tech }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
                 <div class="details-section">
                     <div class="details-title">Learning Outcomes</div>
                     <ul class="outcomes-list">
@@ -289,6 +323,23 @@
     </div>
     {% endif %}
 </div>
+
+<!-- Drawer HTML -->
+<div class="drawer-overlay" id="projectDrawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="projectDrawer">
+    <div class="drawer-header">
+        <div>
+            <span class="badge" style="background:var(--accent-primary-light); color:var(--accent-primary); margin-bottom:0.75rem; display:inline-block; font-size:0.9rem; padding: 4px 10px; border-radius: 999px; font-weight: bold;">Project Details</span>
+            <h2 class="drawer-title" id="drawerTitle" style="font-size: 1.8rem;">Project Name</h2>
+        </div>
+        <button class="drawer-close" onclick="closeDrawer()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+    </div>
+    <div class="drawer-body" id="drawerBody">
+        <!-- populated dynamically -->
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -306,12 +357,6 @@
                 const tier = tab.getAttribute('data-tier');
                 
                 cards.forEach(card => {
-                    // Always collapse details when filtering
-                    const details = card.querySelector('.proj-details');
-                    const btn = card.querySelector('.toggle-details-btn');
-                    details.style.display = 'none';
-                    btn.textContent = 'View Details';
-                    
                     if (tier === 'all' || card.getAttribute('data-tier') === tier) {
                         card.style.display = 'flex';
                     } else {
@@ -321,23 +366,34 @@
             });
         });
         
-        // Toggle Details
+        // Open Details in Drawer
         const toggleBtns = document.querySelectorAll('.toggle-details-btn');
+        const overlay = document.getElementById('projectDrawerOverlay');
+        const drawer = document.getElementById('projectDrawer');
+        const drawerTitle = document.getElementById('drawerTitle');
+        const drawerBody = document.getElementById('drawerBody');
+        
+        if (overlay) document.body.appendChild(overlay);
+        if (drawer) document.body.appendChild(drawer);
         
         toggleBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 const card = this.closest('.proj-card');
-                const details = card.querySelector('.proj-details');
+                const title = card.querySelector('.proj-title').textContent;
+                const details = card.querySelector('.proj-details').innerHTML;
                 
-                if (details.style.display === 'block') {
-                    details.style.display = 'none';
-                    this.textContent = 'View Details';
-                } else {
-                    details.style.display = 'block';
-                    this.textContent = 'Hide Details';
-                }
+                drawerTitle.textContent = title;
+                drawerBody.innerHTML = details;
+                
+                overlay.classList.add('active');
+                drawer.classList.add('active');
             });
         });
+
+        window.closeDrawer = function() {
+            if (overlay) overlay.classList.remove('active');
+            if (drawer) drawer.classList.remove('active');
+        };
     });
 </script>
 {% endblock %}

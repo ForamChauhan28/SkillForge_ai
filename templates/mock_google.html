@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 36px 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+        .google-logo {
+            width: 74px;
+            margin-bottom: 16px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #1f1f1f;
+            margin: 0 0 8px 0;
+        }
+        p {
+            color: #444746;
+            font-size: 16px;
+            margin: 0 0 32px 0;
+        }
+        .account-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+        .account-btn {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border: 1px solid #c7c7c7;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+        .account-btn:hover {
+            background: #f8f9fa;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #1a73e8;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 500;
+            margin-right: 16px;
+        }
+        .avatar.pink { background: #e53935; }
+        .avatar.green { background: #43a047; }
+        .info {
+            display: flex;
+            flex-direction: column;
+        }
+        .name {
+            font-weight: 500;
+            color: #1f1f1f;
+            font-size: 14px;
+        }
+        .email {
+            color: #444746;
+            font-size: 12px;
+        }
+        .dev-badge {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #b3261e;
+            background: #fce8e6;
+            padding: 8px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" class="google-logo">
+        <h1>Choose an account</h1>
+        <p>to continue to SkillForge AI</p>
+        
+        <div class="account-list">
+            <a href="{{ url_for('auth.login_google_mock', name='Foram Chauhan', email='foramchauhan@gmail.com') }}" class="account-btn">
+                <div class="avatar">F</div>
+                <div class="info">
+                    <span class="name">Foram Chauhan</span>
+                    <span class="email">foramchauhan@gmail.com</span>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('auth.login_google_mock', name='Demo User', email='demo_user@gmail.com') }}" class="account-btn">
+                <div class="avatar pink">D</div>
+                <div class="info">
+                    <span class="name">Demo User</span>
+                    <span class="email">demo_user@gmail.com</span>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('auth.login_google_mock', name='Admin Testing', email='admin@skillforge.ai') }}" class="account-btn">
+                <div class="avatar green">A</div>
+                <div class="info">
+                    <span class="name">Admin Testing</span>
+                    <span class="email">admin@skillforge.ai</span>
+                </div>
+            </a>
+        </div>
+        
+        <div class="dev-badge">
+            <strong>Development Mode</strong><br>
+            Real Google OAuth is not configured.
+        </div>
+    </div>
+</body>
+</html>

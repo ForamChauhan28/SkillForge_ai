@@ -162,11 +162,11 @@
     </div>
 </div>
 
-<div class="grid grid-2" style="margin-top: 2rem;">
+<div class="grid grid-2" style="margin-top: 2rem; align-items: stretch;">
     <!-- Left Column -->
-    <div class="animate-fadeInUp delay-2">
+    <div class="animate-fadeInUp delay-2" style="display: flex; flex-direction: column;">
         {% if not profile or not profile.extracted_skills %}
-        <div class="card" id="upload-section">
+        <div class="card" id="upload-section" style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
             <h2>Upload Resume</h2>
             <p class="text-secondary" style="margin-bottom: 1.5rem;">Upload your resume to extract skills and analyze ATS compatibility.</p>
             <div class="upload-zone" id="drop-zone">
@@ -185,25 +185,54 @@
             <div id="categorized-skills" class="skill-tags" style="margin-top: 1rem;"></div>
         </div>
         {% else %}
-        <div class="card" style="margin-bottom: 2rem;">
+        <div class="card" id="skills-section" style="margin-bottom: 2rem;">
             <h2>Your Skills</h2>
-            <div class="skill-tags" style="margin-top: 1rem;">
-                {% for skill in profile.extracted_skills.split(',') %}
-                <span class="skill-tag">{{ skill.strip() }}</span>
-                {% endfor %}
-            </div>
+            <div id="categorized-skills" class="skill-tags" style="margin-top: 1rem;"></div>
+            <input type="hidden" id="raw-skills-data" value="{{ profile.extracted_skills }}">
         </div>
         {% endif %}
         
-        <div class="card {% if not profile or not profile.extracted_skills %}hidden{% endif %}" id="dream-job-section" style="margin-bottom: 2rem;">
+        <div class="card {% if not profile or not profile.extracted_skills %}hidden{% endif %}" id="dream-job-section" style="flex: 1; display: flex; flex-direction: column;">
             <h2>Dream Job</h2>
             <p class="text-secondary">What role are you aiming for?</p>
             <div class="form-group" style="margin-top: 1rem;">
-                <input type="text" id="dream-job-input" class="form-input" placeholder="e.g. Senior Frontend Developer" value="{{ profile.dream_job if profile and profile.dream_job else '' }}">
+                <div class="autocomplete-container">
+                    <input type="text" id="dream-job-input" class="form-input" placeholder="e.g. Senior Frontend Developer" value="{{ profile.dream_job if profile and profile.dream_job else '' }}" autocomplete="off">
+                    <ul id="job-suggestions" class="autocomplete-list"></ul>
+                </div>
             </div>
-            <button id="generate-btn" class="btn btn-primary btn-lg" style="width: 100%;">
+            
+            <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin: 1.5rem 0;">
+                <h4 style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Your Roadmap Includes:</h4>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <li style="display: flex; align-items: center; font-size: 0.95rem; color: var(--text-primary);">
+                        <div style="background: rgba(59, 130, 246, 0.1); color: var(--accent-primary); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
+                            <i class="fas fa-map-marked-alt" style="font-size: 0.75rem;"></i>
+                        </div>
+                        Personalized step-by-step learning path
+                    </li>
+                    <li style="display: flex; align-items: center; font-size: 0.95rem; color: var(--text-primary);">
+                        <div style="background: rgba(74, 222, 128, 0.1); color: #4ade80; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
+                            <i class="fas fa-book" style="font-size: 0.75rem;"></i>
+                        </div>
+                        Curated free courses and resources
+                    </li>
+                    <li style="display: flex; align-items: center; font-size: 0.95rem; color: var(--text-primary);">
+                        <div style="background: rgba(168, 85, 247, 0.1); color: #a855f7; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
+                            <i class="fas fa-robot" style="font-size: 0.75rem;"></i>
+                        </div>
+                        24/7 AI Mentorship for every topic
+                    </li>
+                </ul>
+            </div>
+            
+            {% if roadmap %}
+            <a href="/roadmap" class="btn btn-primary btn-lg" style="width: 100%; text-align: center; display: inline-block; box-sizing: border-box; margin-top: auto;">View Roadmap</a>
+            {% else %}
+            <button id="generate-btn" class="btn btn-primary btn-lg" style="width: 100%; margin-top: auto;">
                 Generate My Roadmap
             </button>
+            {% endif %}
             <div id="generate-spinner" class="hidden" style="text-align: center; margin-top: 1rem;">
                 <div class="spinner" style="margin: 0 auto; width: 30px; height: 30px;"></div>
                 <p class="rotating-message" id="loading-msg" style="margin-top: 0.5rem;">Analyzing skills gap...</p>
@@ -212,9 +241,9 @@
     </div>
 
     <!-- Right Column -->
-    <div class="animate-fadeInUp delay-3">
+    <div class="animate-fadeInUp delay-3" style="display: flex; flex-direction: column;">
         {% if ats_score and ats_score.categories %}
-        <div class="card">
+        <div class="card" style="flex: 1;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2>ATS Analysis</h2>
                 <button id="rescore-btn" class="btn btn-secondary btn-sm">Rescore Resume</button>
@@ -255,7 +284,7 @@
 
             {% if ats_score.suggestions %}
             <div style="margin-top: 1.5rem;">
-                <h4>Suggestions to Improve</h4>
+                <h3>Suggestions to Improve</h3>
                 <ul style="list-style: none; padding: 0; margin-top: 0.5rem;">
                     {% for sug in ats_score.suggestions %}
                     <li style="margin-bottom: 0.5rem; display: flex; align-items: flex-start;">
@@ -274,7 +303,7 @@
             <button id="rescore-btn" class="btn btn-primary" style="margin-top: 1rem;">Score My Resume Now</button>
         </div>
         {% elif not profile or not profile.extracted_skills %}
-        <div class="card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px; text-align: center;">
+        <div class="card" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px; text-align: center;">
             <i class="fas fa-file-signature" style="font-size: 3rem; color: var(--border-color); margin-bottom: 1rem;"></i>
             <h3 class="text-secondary">ATS Score Details</h3>
             <p class="text-tertiary" style="margin-top: 0.5rem;">Upload your resume to see your ATS score breakdown.</p>
@@ -348,6 +377,141 @@
                 }
             });
         }
+
+        // Common Tech Job Roles for Autocomplete
+        const techJobs = [
+            "Full Stack Web Developer", "Frontend Developer", "Backend Developer",
+            "Software Engineer", "Data Scientist", "Data Analyst", "Data Engineer",
+            "Machine Learning Engineer", "DevOps Engineer", "Cloud Architect",
+            "UI/UX Designer", "Product Manager", "Cybersecurity Analyst",
+            "Systems Administrator", "QA Engineer", "Mobile Developer (iOS/Android)",
+            "Blockchain Developer", "Game Developer", "Site Reliability Engineer"
+        ];
+
+        const jobInput = document.getElementById('dream-job-input');
+        const suggestionsList = document.getElementById('job-suggestions');
+
+        if (jobInput && suggestionsList) {
+            function showSuggestions(val) {
+                suggestionsList.innerHTML = '';
+                
+                let matches = [];
+                if (!val) {
+                    matches = techJobs; // Show all if empty
+                } else {
+                    matches = techJobs.filter(job => job.toLowerCase().includes(val));
+                }
+                
+                if (matches.length > 0) {
+                    matches.forEach(match => {
+                        const li = document.createElement('li');
+                        li.className = 'autocomplete-item';
+                        li.textContent = match;
+                        li.addEventListener('click', function() {
+                            jobInput.value = match;
+                            suggestionsList.classList.remove('active');
+                            suggestionsList.innerHTML = '';
+                        });
+                        suggestionsList.appendChild(li);
+                    });
+                    suggestionsList.classList.add('active');
+                } else {
+                    suggestionsList.classList.remove('active');
+                }
+            }
+
+            jobInput.addEventListener('input', function() {
+                showSuggestions(this.value.toLowerCase());
+            });
+
+            jobInput.addEventListener('focus', function() {
+                showSuggestions(this.value.toLowerCase());
+            });
+
+            // Close suggestions when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target !== jobInput && e.target !== suggestionsList) {
+                    suggestionsList.classList.remove('active');
+                }
+            });
+        }
+
+        // Render initial skills if they exist
+        const rawSkillsInput = document.getElementById('raw-skills-data');
+        if (rawSkillsInput && rawSkillsInput.value) {
+            const skillsArray = rawSkillsInput.value.split(',').map(s => s.trim()).filter(s => s);
+            renderCategorizedSkills(skillsArray);
+        }
     });
+
+    function renderCategorizedSkills(skillsArray) {
+        const container = document.getElementById('categorized-skills');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // Define domain keywords
+        const domains = {
+            'Technical Skills': ['Python', 'JavaScript', 'Java', 'C++', 'C#', 'SQL', 'HTML', 'CSS', 'TypeScript', 'Go', 'Ruby', 'PHP', 'Swift', 'Kotlin', 'Rust', 'R', 'MATLAB', 'C', '.NET', 'React', 'Angular', 'Vue', 'Node', 'Express', 'Django', 'Flask', 'Spring', 'TensorFlow', 'PyTorch', 'Keras', 'Pandas', 'NumPy', 'Scikit-Learn', 'Bootstrap', 'Tailwind', 'Next.js', 'Nuxt.js', 'ASP.NET', 'Ruby on Rails', 'Laravel', 'Git', 'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'Linux', 'Jenkins', 'Jira', 'Figma', 'Webpack', 'Babel', 'Postman', 'Heroku', 'Firebase', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'GraphQL', 'REST', 'Web Development', 'Machine Learning', 'Generative AI', 'Prompt Engineering', 'Tkinter', 'Odoo', 'Command-Line Interface', 'CLI', 'API'],
+            'Core & Fundamentals': ['Data Structures', 'Algorithms', 'Object-Oriented Programming', 'OOP', 'System Design', 'Cryptography', 'Database Management', 'Networking', 'Operating Systems', 'Agile', 'Scrum', 'Software Engineering'],
+            'Soft Skills': ['Leadership', 'Communication', 'Teamwork', 'Problem-solving', 'Time Management', 'Critical Thinking', 'Adaptability', 'Creativity', 'Work Ethic', 'Interpersonal', 'Emotional Intelligence', 'Collaboration', 'Problem Solving', 'Effective Communication']
+        };
+
+        const ignoreList = ['english', 'hindi', 'gujarati', 'spanish', 'french', 'german', 'japanese', 'chinese'];
+
+        const categorized = {};
+        const others = [];
+
+        skillsArray.forEach(skill => {
+            const skillLower = skill.trim().toLowerCase();
+            
+            // Skip unnecessary skills like spoken languages
+            if (ignoreList.includes(skillLower)) return;
+
+            let matched = false;
+            
+            for (const [domain, keywords] of Object.entries(domains)) {
+                if (keywords.some(k => {
+                    const kl = k.toLowerCase();
+                    // Match exactly, or as a standalone word
+                    return skillLower === kl || 
+                           skillLower.includes(` ${kl} `) || 
+                           skillLower.startsWith(`${kl} `) || 
+                           skillLower.endsWith(` ${kl}`);
+                })) {
+                    if (!categorized[domain]) categorized[domain] = [];
+                    categorized[domain].push(skill.trim());
+                    matched = true;
+                    break;
+                }
+            }
+            
+            if (!matched && skill.trim().length > 0) {
+                others.push(skill.trim());
+            }
+        });
+
+        // Define render order
+        const renderOrder = ['Technical Skills', 'Core & Fundamentals', 'Soft Skills'];
+        
+        // Render categorized sections in specific order
+        renderOrder.forEach(domain => {
+            if (categorized[domain] && categorized[domain].length > 0) {
+                const title = document.createElement('div');
+                title.className = 'skill-category-title';
+                title.textContent = domain;
+                container.appendChild(title);
+
+                categorized[domain].forEach(skill => {
+                    const span = document.createElement('span');
+                    span.className = 'skill-tag';
+                    span.textContent = skill;
+                    container.appendChild(span);
+                });
+            }
+        });
+
+
+    }
 </script>
 {% endblock %}

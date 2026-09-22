@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort
-from models.user import create_user, get_user_by_email, verify_password
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, abort, current_app
+from models.user import create_user, get_user_by_email, verify_password, create_or_get_google_user
 from services.ai_engine import get_trending_roles, get_demo_roadmaps, get_demo_roadmap_detail
 
 auth_bp = Blueprint('auth', __name__)
@@ -14,6 +14,62 @@ def index():
     demo_roadmaps = get_demo_roadmaps()
     return render_template('landing.html', hide_nav=True, trending_roles=trending_roles, demo_roadmaps=demo_roadmaps)
 
+@auth_bp.route('/login/google')
+def login_google():
+    if not current_app.config.get('GOOGLE_CLIENT_ID'):
+        if current_app.config.get('DEBUG'):
+            # Mock Google Login for local development UI
+            return render_template('mock_google.html')
+                
+        flash('Google Login is not configured yet. Please configure OAuth Client ID.', 'warning')
+        return redirect(url_for('auth.login'))
+        
+    redirect_uri = url_for('auth.auth_google', _external=True)
+    return current_app.oauth.google.authorize_redirect(redirect_uri)
+
+@auth_bp.route('/login/google/mock')
+def login_google_mock():
+    if not current_app.config.get('DEBUG'):
+        abort(404)
+        
+    mock_name = request.args.get('name', 'Demo User')
+    mock_email = request.args.get('email', 'demo_user@gmail.com')
+    mock_google_id = f"mock_google_id_{mock_email}"
+    
+    user_id = create_or_get_google_user(mock_name, mock_email, mock_google_id)
+    if user_id:
+        session['user_id'] = user_id
+        session['user_name'] = mock_name
+        flash('Login successful!', 'success')
+        return redirect(url_for('dashboard.dashboard'))
+    else:
+        flash('Failed to create mock user account.', 'danger')
+        return redirect(url_for('auth.login'))
+
+@auth_bp.route('/login/google/callback')
+def auth_google():
+    try:
+        token = current_app.oauth.google.authorize_access_token()
+        user_info = token.get('userinfo')
+        if user_info:
+            email = user_info['email']
+            name = user_info.get('name', email.split('@')[0])
+            google_id = user_info['sub']
+            
+            user_id = create_or_get_google_user(name, email, google_id)
+            if user_id:
+                session['user_id'] = user_id
+                session['user_name'] = name
+                flash('Successfully logged in with Google!', 'success')
+                return redirect(url_for('dashboard.dashboard'))
+            else:
+                flash('Failed to create user account.', 'danger')
+                return redirect(url_for('auth.login'))
+    except Exception as e:
+        print(f"OAuth error: {e}")
+        flash('Google login failed or was cancelled.', 'danger')
+        
+    return redirect(url_for('auth.login'))
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():

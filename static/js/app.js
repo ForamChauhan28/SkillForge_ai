@@ -4,37 +4,30 @@
    ═══════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initThemeToggle();
+    initParticles();
     initMobileMenu();
     initFlashDismiss();
     initAnimations();
 });
 
 
-/* ═══════════════ Theme Toggle ═══════════════ */
+/* ═══════════════ Global Particles ═══════════════ */
 
-function initThemeToggle() {
-    const toggle = document.getElementById('themeToggle');
-    if (!toggle) return;
+function initParticles() {
+    const particlesContainer = document.getElementById('particles');
+    if (!particlesContainer) return;
 
-    // Load saved theme or default to light
-    const savedTheme = localStorage.getItem('skillforge-theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-
-    toggle.addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('skillforge-theme', next);
-    });
-
-    // Keyboard support
-    toggle.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            toggle.click();
-        }
-    });
+    for (let i = 0; i < 50; i++) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        const size = Math.random() * 6 + 2;
+        p.style.width = `${size}px`;
+        p.style.height = `${size}px`;
+        p.style.left = `${Math.random() * 100}%`;
+        p.style.animationDuration = `${Math.random() * 15 + 10}s`;
+        p.style.animationDelay = `-${Math.random() * 20}s`;
+        particlesContainer.appendChild(p);
+    }
 }
 
 

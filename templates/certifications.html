@@ -4,31 +4,7 @@
 
 {% block extra_css %}
 <style>
-    .cert-filter-bar {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .filter-btn {
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-        padding: 0.5rem 1.5rem;
-        border-radius: 20px;
-        cursor: pointer;
-        transition: var(--transition);
-        font-weight: 500;
-    }
-    
-    .filter-btn:hover, .filter-btn.active {
-        background: var(--accent-primary);
-        color: white;
-        border-color: var(--accent-primary);
-    }
-    
+
     .cert-card {
         position: relative;
         overflow: hidden;
@@ -47,27 +23,27 @@
         box-shadow: var(--shadow-lg);
     }
     
-    /* Gradient left border based on difficulty */
+    /* Gradient top border based on difficulty to match projects */
     .cert-card::before {
         content: '';
         position: absolute;
         left: 0;
         top: 0;
-        bottom: 0;
-        width: 6px;
+        right: 0;
+        height: 6px;
         background: var(--accent-gradient);
     }
     
     .cert-card[data-difficulty="Beginner"]::before {
-        background: linear-gradient(to bottom, #4ade80, #22c55e);
+        background: linear-gradient(90deg, #4ade80, #22c55e);
     }
     
     .cert-card[data-difficulty="Intermediate"]::before {
-        background: linear-gradient(to bottom, #facc15, #eab308);
+        background: linear-gradient(90deg, #facc15, #eab308);
     }
     
     .cert-card[data-difficulty="Advanced"]::before {
-        background: linear-gradient(to bottom, #f87171, #ef4444);
+        background: linear-gradient(90deg, #f87171, #ef4444);
     }
     
     .cert-header {
@@ -75,7 +51,6 @@
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 1rem;
-        padding-left: 10px;
     }
     
     .cert-title {
@@ -109,21 +84,31 @@
         font-size: 0.95rem;
         line-height: 1.5;
         margin-bottom: 1.5rem;
-        flex-grow: 1;
-        padding-left: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
     
     .cert-info {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        background: var(--bg-tertiary);
-        border-radius: 8px;
+        gap: 0.5rem;
         margin-bottom: 1.5rem;
-        margin-left: 10px;
-        font-size: 0.9rem;
-        color: var(--text-secondary);
+        font-size: 0.8rem;
+        color: var(--text-primary);
+        flex-wrap: wrap;
+        flex-grow: 1;
+    }
+    
+    .info-pill {
+        background: var(--bg-tertiary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
     .info-item {
@@ -132,14 +117,7 @@
         gap: 0.5rem;
     }
     
-    .info-divider {
-        width: 1px;
-        height: 15px;
-        background: var(--border-color);
-    }
-    
     .cert-footer {
-        padding-left: 10px;
         margin-top: auto;
     }
     
@@ -167,11 +145,19 @@
     </div>
 
     {% if certifications %}
-    <div class="cert-filter-bar delay-1">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="Beginner">Beginner</button>
-        <button class="filter-btn" data-filter="Intermediate">Intermediate</button>
-        <button class="filter-btn" data-filter="Advanced">Advanced</button>
+    <div class="tabs-container delay-1">
+        <button class="tab-btn active" data-filter="all">
+            All <span class="count-badge">{{ certifications|length }}</span>
+        </button>
+        <button class="tab-btn" data-filter="Beginner">
+            Beginner <span class="count-badge">{{ beginner|length if beginner else 0 }}</span>
+        </button>
+        <button class="tab-btn" data-filter="Intermediate">
+            Intermediate <span class="count-badge">{{ intermediate|length if intermediate else 0 }}</span>
+        </button>
+        <button class="tab-btn" data-filter="Advanced">
+            Advanced <span class="count-badge">{{ advanced|length if advanced else 0 }}</span>
+        </button>
     </div>
 
     <div class="grid grid-3 delay-2" id="certGrid">
@@ -188,20 +174,19 @@
             <p class="cert-desc">{{ cert.description }}</p>
             
             <div class="cert-info">
-                <div class="info-item">
+                <span class="info-pill">
                     <i class="fas fa-money-bill-wave"></i>
-                    <span>{{ cert.estimated_cost }}</span>
-                </div>
-                <div class="info-divider"></div>
-                <div class="info-item">
+                    {{ cert.estimated_cost }}
+                </span>
+                <span class="info-pill">
                     <i class="fas fa-clock"></i>
-                    <span>{{ cert.duration }}</span>
-                </div>
+                    {{ cert.duration }}
+                </span>
             </div>
             
             <div class="cert-footer">
-                <a href="{{ cert.url }}" target="_blank" class="btn btn-primary" style="width: 100%; text-align: center; display: block;">
-                    Learn More <i class="fas fa-external-link-alt" style="margin-left: 5px;"></i>
+                <a href="{{ cert.url }}" target="_blank" class="btn btn-secondary" style="width: 100%; text-align: center; display: block;">
+                    Learn More
                 </a>
             </div>
         </div>
@@ -221,7 +206,7 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const filterBtns = document.querySelectorAll('.filter-btn');
+        const filterBtns = document.querySelectorAll('.tab-btn');
         const certCards = document.querySelectorAll('.cert-card');
         
         filterBtns.forEach(btn => {
@@ -231,10 +216,11 @@
                 // Add active class to clicked button
                 btn.classList.add('active');
                 
-                const filterValue = btn.getAttribute('data-filter');
+                const filterValue = btn.getAttribute('data-filter').toLowerCase().trim();
                 
                 certCards.forEach(card => {
-                    if (filterValue === 'all' || card.getAttribute('data-difficulty') === filterValue) {
+                    const cardDifficulty = (card.getAttribute('data-difficulty') || '').toLowerCase().trim();
+                    if (filterValue === 'all' || cardDifficulty === filterValue) {
                         card.style.display = 'flex';
                     } else {
                         card.style.display = 'none';

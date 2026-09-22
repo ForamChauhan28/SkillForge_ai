@@ -11,19 +11,26 @@
         align-items: center;
         justify-content: center;
         padding: 2rem;
-        background: var(--bg-primary);
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
         position: relative;
+        width: 100%;
+        max-width: none;
+        overflow: hidden;
     }
     
     .auth-card {
-        background: var(--bg-secondary);
-        border: 1px solid var(--border-color);
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: var(--card-radius);
         padding: 3rem;
         width: 100%;
         max-width: 450px;
-        box-shadow: var(--shadow-lg);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         animation: fadeInUp 0.6s ease-out;
+        z-index: 2;
+        color: white;
     }
     
     .auth-header {
@@ -33,60 +40,45 @@
     
     .auth-logo {
         font-size: 3rem;
-        color: var(--accent-primary);
+        color: white;
         margin-bottom: 1rem;
+        text-shadow: 0 0 20px rgba(255,255,255,0.3);
     }
     
     .auth-title {
         font-size: 2rem;
         font-weight: 700;
-        color: var(--text-primary);
+        color: white;
         margin-bottom: 0.5rem;
     }
     
     .auth-subtitle {
-        color: var(--text-secondary);
+        color: #cbd5e1;
     }
     
     .auth-links {
         margin-top: 2rem;
         text-align: center;
-        color: var(--text-secondary);
+    }
+    
+    .auth-links p {
+        color: #cbd5e1;
     }
     
     .auth-links a {
-        color: var(--accent-primary);
+        color: white;
         font-weight: 600;
-        text-decoration: none;
-        transition: var(--transition);
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        transition: color 0.2s;
     }
     
     .auth-links a:hover {
-        color: var(--accent-secondary);
+        color: #e2e8f0;
     }
     
     .theme-toggle-fixed {
-        position: fixed;
-        top: 2rem;
-        right: 2rem;
-        background: var(--bg-secondary);
-        border: 1px solid var(--border-color);
-        color: var(--text-primary);
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: var(--transition);
-        box-shadow: var(--shadow-sm);
-        z-index: 100;
-    }
-    
-    .theme-toggle-fixed:hover {
-        transform: scale(1.1);
-        box-shadow: var(--shadow-md);
+        display: none !important;
     }
 
     /* Button Loading State */
@@ -103,8 +95,8 @@
         height: 20px;
         top: calc(50% - 10px);
         left: calc(50% - 10px);
-        border: 2px solid rgba(255, 255, 255, 0.5);
-        border-top-color: white;
+        border: 2px solid rgba(15, 23, 42, 0.2);
+        border-top-color: #0f172a;
         border-radius: 50%;
         animation: spin 1s linear infinite;
     }
@@ -123,6 +115,127 @@
             transform: translateY(0);
         }
     }
+
+    /* Form Fields */
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #e2e8f0;
+        text-align: left;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: white;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        outline: none;
+    }
+
+    .form-input:focus {
+        border-color: white;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .form-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .btn-primary {
+        background: white;
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 1.125rem;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        border: 2px solid white;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+        background: #f3f2f1;
+        color: #0f172a !important;
+    }
+
+    /* OAuth Divider and Button */
+    .oauth-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #94a3b8;
+    }
+    
+    .oauth-divider::before,
+    .oauth-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .oauth-divider span {
+        padding: 0 1rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .btn-google {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        background: white;
+        color: #0f172a;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0.75rem 2rem;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    
+    .btn-google:hover {
+        background: #f8fafc;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .google-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+    }
+
+    /* Particles */
+    .hero-particles {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        overflow: hidden;
+        z-index: 0;
+    }
+    .particle {
+        position: absolute;
+        bottom: -20px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(1); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+    }
 </style>
 {% endblock %}
 
@@ -132,6 +245,7 @@
 </button>
 
 <div class="auth-container">
+    <div class="hero-particles" id="particles"></div>
     <div class="auth-card">
         <div class="auth-header">
             <i class="fas fa-bolt auth-logo"></i>
@@ -153,6 +267,15 @@
             <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" id="submitBtn">Sign In</button>
         </form>
         
+        <div class="oauth-divider">
+            <span>OR</span>
+        </div>
+        
+        <a href="{{ url_for('auth.login_google') }}" class="btn-google">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google Logo" class="google-icon">
+            Continue with Google
+        </a>
+        
         <div class="auth-links">
             <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Create one here</a></p>
         </div>
@@ -167,5 +290,21 @@
         btn.classList.add('btn-loading');
         // Let the form submit naturally
     });
+
+    // Particle Generation
+    const particlesContainer = document.getElementById('particles');
+    if (particlesContainer) {
+        for (let i = 0; i < 50; i++) {
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            const size = Math.random() * 6 + 2;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.animationDuration = `${Math.random() * 15 + 10}s`;
+            p.style.animationDelay = `-${Math.random() * 20}s`;
+            particlesContainer.appendChild(p);
+        }
+    }
 </script>
 {% endblock %}

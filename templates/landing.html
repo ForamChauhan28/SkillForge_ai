@@ -24,6 +24,7 @@
         position: relative;
         z-index: 2;
         max-width: 800px;
+        margin-bottom: 15vh;
     }
 
     .logo-container {
@@ -60,6 +61,8 @@
         max-width: 600px;
         margin-left: auto;
         margin-right: auto;
+        color: #e8f3ff;
+        text-align: center;
     }
 
     .hero-cta {
@@ -84,6 +87,7 @@
 
     .btn-hero-primary:hover {
         background: #f3f2f1;
+        color: var(--accent-primary) !important;
     }
 
     .btn-hero-secondary {
@@ -100,10 +104,43 @@
     }
 
     .btn-hero-secondary:hover {
-        background: rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.1) !important;
+        color: white !important;
+        border-color: white !important;
+    }
+
+    /* ═══════════ Particles Background ═══════════ */
+    .hero-particles {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        overflow: hidden;
+        z-index: 1; /* Below content, above gradient */
+    }
+    
+    .particle {
+        position: absolute;
+        bottom: -20px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        animation: floatUp linear infinite;
+    }
+    
+    @keyframes floatUp {
+        0% { transform: translateY(0) scale(1); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
     }
 
     /* ═══════════ Theme Toggle (Landing) ═══════════ */
+    [data-theme="dark"] {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e1;
+        --border-color: #334155;
+    }
+
     .theme-toggle-fixed {
         position: fixed;
         top: 1.5rem;
@@ -130,6 +167,8 @@
         transform: scale(1.15) rotate(15deg);
         box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
+
+
 
     /* ═══════════ Sections ═══════════ */
     .landing-section {
@@ -171,7 +210,7 @@
     .steps-grid::before {
         content: '';
         position: absolute;
-        top: 50px;
+        top: 32px;
         left: 15%;
         right: 15%;
         height: 3px;
@@ -375,7 +414,7 @@
     .cta-section {
         text-align: center;
         padding: 6rem 2rem;
-        background: linear-gradient(135deg, var(--accent-primary), #764ba2);
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
         color: white;
     }
 
@@ -390,6 +429,7 @@
         font-size: 1.1rem;
         opacity: 0.9;
         margin-bottom: 2rem;
+        color: #e8f3ff;
     }
 
     .btn-cta {
@@ -450,6 +490,7 @@
 
 {% block content %}
 
+
 <!-- Theme Toggle -->
 <button class="theme-toggle-fixed" id="landingThemeToggle" aria-label="Toggle Theme">
     <span id="themeIcon">🌙</span>
@@ -466,7 +507,7 @@
         <h2 class="hero-tagline">Your AI-Powered Career Companion</h2>
         <p class="hero-subtitle">Upload your resume, discover skill gaps, and get a personalized learning roadmap powered by AI to land your dream role.</p>
         <div class="hero-cta">
-            <a href="{{ url_for('auth.register') }}" class="btn-hero-primary">🚀 Get Started Free</a>
+            <a href="{{ url_for('auth.register') }}" class="btn-hero-primary">Get Started Free</a>
             <a href="{{ url_for('auth.login') }}" class="btn-hero-secondary">Sign In</a>
         </div>
     </div>
@@ -675,7 +716,7 @@
     <div class="scroll-reveal">
         <h2 class="cta-title">Ready to Accelerate Your Career?</h2>
         <p class="cta-subtitle">Join thousands of professionals building their future with AI-powered roadmaps.</p>
-        <a href="{{ url_for('auth.register') }}" class="btn-cta">🚀 Create Free Account</a>
+        <a href="{{ url_for('auth.register') }}" class="btn-cta">Create Free Account</a>
     </div>
 </section>
 
@@ -687,23 +728,7 @@
 
 {% block extra_js %}
 <script>
-    // Theme Toggle for Landing Page
-    const landingToggle = document.getElementById('landingThemeToggle');
-    const themeIcon = document.getElementById('themeIcon');
 
-    if (landingToggle) {
-        // Set icon based on current theme
-        const current = document.documentElement.getAttribute('data-theme') || 'light';
-        themeIcon.textContent = current === 'dark' ? '☀️' : '🌙';
-
-        landingToggle.addEventListener('click', () => {
-            const cur = document.documentElement.getAttribute('data-theme');
-            const next = cur === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('skillforge-theme', next);
-            themeIcon.textContent = next === 'dark' ? '☀️' : '🌙';
-        });
-    }
 
     // Particle Generation
     const particlesContainer = document.getElementById('particles');
@@ -730,6 +755,27 @@
             observer.unobserve(entry.target);
         });
     }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+    revealElements.forEach(el => revealOnScroll.observe(el));
+
+    // Theme Toggle for Landing Page
+    const landingToggle = document.getElementById('landingThemeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+
+    if (landingToggle) {
+        // Set icon and theme based on saved preference
+        const savedTheme = localStorage.getItem('skillforge-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+        landingToggle.addEventListener('click', () => {
+            const cur = document.documentElement.getAttribute('data-theme');
+            const next = cur === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('skillforge-theme', next);
+            themeIcon.textContent = next === 'dark' ? '☀️' : '🌙';
+        });
+    }
 
     revealElements.forEach(el => revealOnScroll.observe(el));
 </script>
