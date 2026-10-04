@@ -1065,6 +1065,7 @@
     </div>
     {% endif %}
 </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════
      Loading Screen
@@ -1082,8 +1083,9 @@
     <!-- Top Header -->
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: white; padding: 1rem 2rem; border-radius: 12px; border: 1px solid var(--border-color);">
         <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent-primary); font-weight: bold; font-size: 1.2rem;">
-            <i class="fas fa-robot"></i> AI SCREENING
+            <i class="fas fa-robot"></i> <span id="simTitle">AI SCREENING</span>
         </div>
+        <div id="simMeta" style="display: none;"></div>
         <div style="display: flex; align-items: center; gap: 1rem;">
             <div style="color: var(--danger); border: 1px solid var(--danger); padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.9rem; font-weight: 500;">
                 Tab Switched: <span id="tabSwitchCount">0</span>
@@ -1161,6 +1163,7 @@
                 <div style="display: flex; gap: 1rem; align-items: center;">
                     <span id="recordingIndicator" style="display: none; color: #ef4444; font-size: 0.9rem; font-weight: 600; align-items: center; gap: 0.5rem;"><span style="display: inline-block; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite;"></span> Recording...</span>
                     <button class="btn btn-primary bg-gradient" style="background: #1e1b4b; border-color: #1e1b4b; padding: 0.75rem 2rem; font-weight: 500;" id="btnRecording" onclick="toggleRecording()">Start Recording</button>
+                    <button class="btn btn-primary bg-gradient" style="padding: 0.75rem 2rem; font-weight: 500;" id="btnSubmitAnswer" onclick="submitAnswer()">Submit Answer</button>
                 </div>
             </div>
         </div>
@@ -1336,19 +1339,30 @@ function showCustomSuccess(message) {
 //  Screen Management
 // ═══════════════════════════════════════════════════
 function showScreen(screenId) {
-    document.getElementById('setupScreen').style.display = 'none';
-    document.getElementById('simLoading').style.display = 'none';
-    document.getElementById('simulatorScreen').style.display = 'none';
-    document.getElementById('thankYouScreen').style.display = 'none';
-    document.getElementById('feedbackScreen').style.display = 'none';
-    document.getElementById('reportScreen').style.display = 'none';
-    
-    if (screenId === 'setup') document.getElementById('setupScreen').style.display = 'block';
-    if (screenId === 'loading') document.getElementById('simLoading').style.display = 'flex';
-    if (screenId === 'simulator') document.getElementById('simulatorScreen').style.display = 'block';
-    if (screenId === 'thankYou') document.getElementById('thankYouScreen').style.display = 'flex';
-    if (screenId === 'feedback') document.getElementById('feedbackScreen').style.display = 'flex';
-    if (screenId === 'report') document.getElementById('reportScreen').style.display = 'block';
+    const screens = {
+        setup: document.getElementById('setupScreen'),
+        loading: document.getElementById('simLoading'),
+        simulator: document.getElementById('simulatorScreen'),
+        thankYou: document.getElementById('thankYouScreen'),
+        feedback: document.getElementById('feedbackScreen'),
+        report: document.getElementById('reportScreen')
+    };
+
+    Object.values(screens).forEach(s => {
+        if (s) s.style.display = 'none';
+    });
+
+    if (screens[screenId]) {
+        if (screenId === 'loading' || screenId === 'thankYou' || screenId === 'feedback') {
+            screens[screenId].style.display = 'flex';
+        } else {
+            screens[screenId].style.display = 'block';
+        }
+    }
+
+    if (screenId === 'setup') {
+        goToStep(1);
+    }
 }
 
 let interviewTimer = null;
@@ -1800,21 +1814,54 @@ function stopRecording() {
 }
 
 // ═══════════════════════════════════════════════════
-//  Screen Management
+//  Toggle Recording (Start/Stop + Submit)
 // ═══════════════════════════════════════════════════
-function showScreen(screen) {
-    document.getElementById('setupScreen').style.display = 'none';
-    document.getElementById('simLoading').style.display = 'none';
-    document.getElementById('simulatorScreen').style.display = 'none';
-    document.getElementById('reportScreen').style.display = 'none';
-
-    if (screen === 'setup') {
-        document.getElementById('setupScreen').style.display = 'block';
-        goToStep(1); // Ensure we reset to step 1
+function toggleRecording() {
+    if (!state.recognition) {
+        initSpeechRecognition();
+        if (!state.recognition) {
+            showCustomError('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+            return;
+        }
     }
-    else if (screen === 'loading') document.getElementById('simLoading').style.display = 'block';
-    else if (screen === 'simulator') document.getElementById('simulatorScreen').style.display = 'block';
-    else if (screen === 'report') document.getElementById('reportScreen').style.display = 'block';
+
+    const btn = document.getElementById('btnRecording');
+    const recIndicator = document.getElementById('recordingIndicator');
+    const candidateBubble = document.getElementById('candidateAnswerBubble');
+    const candidateText = document.getElementById('candidateTranscriptText');
+    const textarea = document.getElementById('answerInput');
+
+    if (state.isRecording) {
+        // Stop recording
+        try { state.recognition.stop(); } catch(e) {}
+        state.isRecording = false;
+        btn.innerText = 'Start Recording';
+        btn.style.background = '#1e1b4b';
+        btn.style.borderColor = '#1e1b4b';
+        if (recIndicator) recIndicator.style.display = 'none';
+
+        // Show candidate answer bubble with transcript
+        const answer = textarea.value.trim();
+        if (answer && answer !== '...' && answer !== 'Listening...') {
+            candidateText.textContent = answer;
+            candidateBubble.style.display = 'flex';
+        }
+    } else {
+        // Start recording
+        textarea.dataset.preRecordingText = textarea.value;
+        try {
+            state.recognition.start();
+            state.isRecording = true;
+            btn.innerText = 'Stop Recording';
+            btn.style.background = '#ef4444';
+            btn.style.borderColor = '#ef4444';
+            if (recIndicator) recIndicator.style.display = 'flex';
+            candidateText.textContent = 'Listening...';
+            candidateBubble.style.display = 'flex';
+        } catch(e) {
+            console.log('Recording start error:', e);
+        }
+    }
 }
 
 function goToStep(stepNumber) {
@@ -2061,9 +2108,10 @@ function restartInterview() {
     showScreen('setup');
 }
 
-// Init speech recognition on load
+// Init on page load
 document.addEventListener('DOMContentLoaded', () => {
     initSpeechRecognition();
+    showScreen('setup');
 });
 </script>
 {% endblock %}

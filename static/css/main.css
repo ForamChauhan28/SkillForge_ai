@@ -576,6 +576,21 @@ textarea.form-input { resize: vertical; min-height: 100px; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .loading-overlay {
     position: fixed; inset: 0;
     background: rgba(255, 255, 255, 0.8);
