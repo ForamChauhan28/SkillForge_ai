@@ -77,7 +77,7 @@ def upload_resume():
         skills = ai_engine.extract_skills(text)
 
         if not skills:
-            return jsonify({'success': False, 'error': 'AI could not extract skills. Please check your API key.'}), 500
+            return jsonify({'success': False, 'error': 'AI could not extract skills. The AI service may be temporarily unavailable — please try again in a moment.'}), 500
 
         # Format skills as comma-separated string from all categories
         all_skills = []

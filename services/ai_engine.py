@@ -413,7 +413,12 @@ def generate_mock_questions(role, company, round_type, user_skills='', num_quest
     )
     try:
         result = _call_gemini(prompt, temperature=0.7)
-        return result.get('questions', [])
+        # Handle both {"questions": [...]} and bare [...] responses
+        if isinstance(result, list):
+            return result
+        elif isinstance(result, dict):
+            return result.get('questions', [])
+        return []
     except Exception as e:
         print(f"Error generating mock questions: {e}")
         return []
@@ -470,7 +475,7 @@ def evaluate_mock_answer(question, user_answer, category, round_type, role, prev
         f'Output as JSON:\n'
         f'{{\n'
         f'  "overall_score": 7.5,\n'
-        f'  "criteria_scores": {{"criterion_name": score, ...}},\n'
+        f'  "criteria_scores": {{"Technical Accuracy": 8, "Depth": 7, "Problem Solving": 7, "Communication": 8, "Completeness": 7}},\n'
         f'  "strengths": ["specific strength 1", "specific strength 2"],\n'
         f'  "improvements": ["specific area to improve 1", "specific area to improve 2"],\n'
         f'  "missing_points": ["key point the candidate missed"],\n'

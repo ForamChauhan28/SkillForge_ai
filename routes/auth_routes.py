@@ -31,6 +31,10 @@ def login_google():
 def login_google_mock():
     if not current_app.config.get('DEBUG'):
         abort(404)
+
+    # Only allow mock login from localhost for security
+    if request.host.split(':')[0] not in ('localhost', '127.0.0.1'):
+        abort(404)
         
     mock_name = request.args.get('name', 'Demo User')
     mock_email = request.args.get('email', 'demo_user@gmail.com')

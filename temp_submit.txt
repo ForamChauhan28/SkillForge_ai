@@ -1,0 +1,567 @@
+async function submitAnswer() {
+    const answer = document.getElementById('answerInput').value.trim() || document.getElementById('candidateTranscriptText').textContent.trim();
+    if (!answer || answer === '...' || answer === 'Listening...') {
+        showCustomError('Please record your answer before submitting.');
+        return;
+    }
+
+    if (state.isSubmitting) return;
+    state.isSubmitting = true;
+
+    // Update bubble to show submitting
+    document.getElementById('candidateTranscriptText').textContent = answer;
+    document.getElementById('candidateAnswerBubble').style.display = 'flex';
+
+    const btn = document.getElementById('btnRecording');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Submitting...';
+    }
+
+    // Stop recording if active
+    if (state.isRecording) stopRecording();
+
+    try {
+        const res = await fetch('/api/mock-interview/answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                session_id: state.sessionId,
+                question_index: state.currentIndex,
+                answer: answer
+            })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to evaluate answer');
+        }
+
+        if (data.is_last_question) {
+            showScreen('thankYou');
+        } else {
+            state.nextQuestion = data.next_question;
+            state.currentIndex = data.next_question.index;
+            renderQuestion(data.next_question, state.currentIndex, state.totalQuestions);
+        }
+
+    } catch (err) {
+        showCustomError('Error: ' + err.message);
+        if (btn) btn.innerText = 'Start Recording';
+    } finally {
+        state.isSubmitting = false;
+        if (btn) btn.disabled = false;
+    }
+}
+
+// ═══════════════════════════════════════════════════
+//  Skip Question
+// ═══════════════════════════════════════════════════
+function skipQuestion() {
+    document.getElementById('answerInput').value = 'I would like to skip this question.';
+    submitAnswer();
+}
+
+// ═══════════════════════════════════════════════════
+//  New Flow Helpers
+// ═══════════════════════════════════════════════════
+function endInterviewEarly() {
+    showScreen('thankYou');
+}
+
+function showFeedbackScreen() {
+    showScreen('feedback');
+}
+
+let selectedFeedbackRating = 0;
+function selectRating(element, rating) {
+    selectedFeedbackRating = rating;
+    const faces = document.querySelectorAll('.rating-face');
+    faces.forEach(f => {
+        f.style.color = '#cbd5e1';
+        f.style.transform = 'scale(1)';
+    });
+    element.style.color = '#1e1b4b';
+    element.style.transform = 'scale(1.2)';
+    
+    const submitBtn = document.getElementById('submitFeedbackBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.background = '#1e1b4b';
+    }
+}
+
+async function submitFeedback() {
+    const btn = document.getElementById('submitFeedbackBtn');
+    if (btn) {
+        btn.innerText = 'Loading Report...';
+        btn.disabled = true;
+    }
+    
+    await viewReport();
+}
+
+// ═══════════════════════════════════════════════════
+//  View Report
+// ═══════════════════════════════════════════════════
+async function viewReport() {
+    showScreen('loading');
+    document.getElementById('loadingMessage').textContent = 'Generating your performance report...';
+
+    try {
+        const res = await fetch(`/api/mock-interview/${state.sessionId}/report`);
+        const data = await res.json();
+
+        if (!data.success) throw new Error(data.error || 'Failed to generate report');
+
+        renderReport(data.report);
+        showScreen('report');
+    } catch (err) {
+        showCustomError('Error: ' + err.message);
+        showScreen('simulator');
+    }
+}
+
+// ═══════════════════════════════════════════════════
+//  Render Report
+// ═══════════════════════════════════════════════════
+function renderReport(report) {
+    // Grade
+    const gradeEl = document.getElementById('reportGrade');
+    const grade = report.overall_grade || 'N/A';
+    gradeEl.textContent = grade;
+    gradeEl.className = 'report-grade';
+    if (grade.startsWith('A')) gradeEl.classList.add('grade-a');
+    else if (grade.startsWith('B')) gradeEl.classList.add('grade-b');
+    else if (grade.startsWith('C')) gradeEl.classList.add('grade-c');
+    else gradeEl.classList.add('grade-d');
+
+    // Verdict
+    const verdictEl = document.getElementById('reportVerdict');
+    const verdict = report.verdict || 'N/A';
+    const verdictText = verdict.replace(/_/g, ' ');
+    verdictEl.textContent = verdictText;
+    verdictEl.className = 'report-verdict';
+    if (verdict === 'HIRE') verdictEl.classList.add('verdict-hire');
+    else if (verdict === 'LEAN_HIRE') verdictEl.classList.add('verdict-lean-hire');
+    else if (verdict === 'LEAN_NO_HIRE') verdictEl.classList.add('verdict-lean-no-hire');
+    else verdictEl.classList.add('verdict-no-hire');
+
+    // Summary
+    document.getElementById('reportSummary').textContent = report.summary || '';
+
+    // Category scores
+    const scoresGrid = document.getElementById('reportScores');
+    scoresGrid.innerHTML = '';
+    const catScores = report.category_scores || {};
+    Object.entries(catScores).forEach(([key, val]) => {
+        const scoreVal = parseFloat(val) || 0;
+        let color = 'var(--success)';
+        if (scoreVal < 5) color = 'var(--danger)';
+        else if (scoreVal < 7) color = 'var(--warning)';
+
+        scoresGrid.innerHTML += `
+            <div class="score-card">
+                <div class="score-val" style="color:${color}">${scoreVal.toFixed(1)}</div>
+                <div class="score-label">${key.replace(/_/g, ' ')}</div>
+            </div>`;
+    });
+
+    // Strengths
+    const strengthsList = document.getElementById('reportStrengthsList');
+    strengthsList.innerHTML = '';
+    (report.top_strengths || []).forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        strengthsList.appendChild(li);
+    });
+
+    // Improvements
+    const improveList = document.getElementById('reportImproveList');
+    improveList.innerHTML = '';
+    (report.areas_to_improve || []).forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        improveList.appendChild(li);
+    });
+
+    // Action plan
+    const actionsList = document.getElementById('reportActionsList');
+    actionsList.innerHTML = '';
+    (report.action_plan || []).forEach(a => {
+        const priority = (a.priority || 'medium').toLowerCase();
+        actionsList.innerHTML += `
+            <div class="action-item">
+                <span class="action-text">${a.action || ''} <span style="color:var(--text-tertiary);font-size:0.85rem;">(${a.timeframe || ''})</span></span>
+                <span class="action-priority priority-${priority}">${priority}</span>
+            </div>`;
+    });
+
+    // Encouragement
+    document.getElementById('reportEncouragement').textContent = report.encouragement || 'Keep practicing!';
+}
+
+// ═══════════════════════════════════════════════════
+//  Speech-to-Text (Web Speech API)
+// ═══════════════════════════════════════════════════
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.log('Speech recognition not supported');
+        const micBtn = document.getElementById('micBtn');
+        if (micBtn) micBtn.style.display = 'none';
+        return;
+    }
+
+    state.recognition = new SpeechRecognition();
+    state.recognition.continuous = true;
+    state.recognition.interimResults = true;
+    state.recognition.lang = 'en-US';
+
+    let finalTranscript = '';
+
+    state.recognition.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript + ' ';
+            } else {
+                interim = transcript;
+            }
+        }
+        const textarea = document.getElementById('answerInput');
+        // Preserve any text the user typed manually before starting mic
+        const existingText = textarea.dataset.preRecordingText || '';
+        textarea.value = existingText + finalTranscript + interim;
+    };
+
+    state.recognition.onerror = (event) => {
+        console.log('Speech error:', event.error);
+        if (event.error !== 'no-speech') {
+            stopRecording();
+        }
+    };
+
+    state.recognition.onend = () => {
+        if (state.isRecording) {
+            // Auto-restart if still recording
+            try { state.recognition.start(); } catch(e) {}
+        }
+    };
+}
+
+function toggleMic() {
+    if (!state.recognition) {
+        initSpeechRecognition();
+        if (!state.recognition) {
+            showCustomError('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+            return;
+        }
+    }
+
+    if (state.isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+}
+
+function startRecording() {
+    const textarea = document.getElementById('answerInput');
+    textarea.dataset.preRecordingText = textarea.value;
+    
+    try {
+        state.recognition.start();
+        state.isRecording = true;
+        document.getElementById('micBtn').classList.add('recording');
+        document.getElementById('micBtn').textContent = '⏹️';
+        const statusEl = document.getElementById('micStatus');
+        statusEl.textContent = '🔴 Listening... speak now';
+        statusEl.classList.add('active');
+    } catch(e) {
+        console.log('Mic start error:', e);
+    }
+}
+
+function stopRecording() {
+    try {
+        state.recognition.stop();
+    } catch(e) {}
+    state.isRecording = false;
+    document.getElementById('micBtn').classList.remove('recording');
+    document.getElementById('micBtn').textContent = '🎤';
+    const statusEl = document.getElementById('micStatus');
+    statusEl.textContent = 'Click mic to speak';
+    statusEl.classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════
+//  Screen Management
+// ═══════════════════════════════════════════════════
+function showScreen(screen) {
+    document.getElementById('setupScreen').style.display = 'none';
+    document.getElementById('simLoading').style.display = 'none';
+    document.getElementById('simulatorScreen').style.display = 'none';
+    document.getElementById('reportScreen').style.display = 'none';
+
+    if (screen === 'setup') {
+        document.getElementById('setupScreen').style.display = 'block';
+        goToStep(1); // Ensure we reset to step 1
+    }
+    else if (screen === 'loading') document.getElementById('simLoading').style.display = 'block';
+    else if (screen === 'simulator') document.getElementById('simulatorScreen').style.display = 'block';
+    else if (screen === 'report') document.getElementById('reportScreen').style.display = 'block';
+}
+
+function goToStep(stepNumber) {
+    document.getElementById('step1Screen').style.display = 'none';
+    document.getElementById('step2Screen').style.display = 'none';
+    document.getElementById('step3Screen').style.display = 'none';
+    document.getElementById('step4Screen').style.display = 'none';
+    document.getElementById('step5Screen').style.display = 'none';
+
+    if (stepNumber === 1) {
+        document.getElementById('step1Screen').style.display = 'block';
+    } else if (stepNumber === 2) {
+        const role = document.getElementById('roleInput').value.trim() || 'General';
+        const count = document.getElementById('questionCount').value;
+        const time = document.getElementById('timeLimitInput').value;
+        
+        document.getElementById('displayRoleName').textContent = role;
+        document.getElementById('displayQuestionCount').textContent = count;
+        document.getElementById('displayTimeLimit').textContent = time;
+        
+        document.getElementById('step2Screen').style.display = 'block';
+    } else if (stepNumber === 3) {
+        const name = document.getElementById('candidateName').value.trim();
+        const email = document.getElementById('candidateEmail').value.trim();
+        if (!name || !email) {
+            showCustomError('Please provide your name and email.');
+            document.getElementById('step2Screen').style.display = 'block';
+            return;
+        }
+        
+        const role = document.getElementById('roleInput').value.trim() || 'General';
+        document.getElementById('eligibilityRoleName').textContent = role;
+        
+        document.getElementById('step3Screen').style.display = 'block';
+    } else if (stepNumber === 4) {
+        document.getElementById('step4Screen').style.display = 'block';
+    } else if (stepNumber === 5) {
+        document.getElementById('step5Screen').style.display = 'block';
+        // Reset permissions when reaching step 5
+        document.getElementById('checkScreen').checked = false;
+        document.getElementById('checkCamera').checked = false;
+        window.localCameraStream = null;
+        window.localScreenStream = null;
+        checkPermissions();
+    }
+}
+
+function verifyEligibility() {
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    const q2 = document.querySelector('input[name="q2"]:checked');
+    const joinDays = document.getElementById('joinDays').value.trim();
+    const university = document.getElementById('university').value.trim();
+    const confirmed = document.getElementById('confirmTruth').checked;
+
+    if (!q1 || !q2 || !joinDays || !university || !confirmed) {
+        showCustomError("Please answer all questions and confirm your information.");
+        return;
+    }
+
+    goToStep(4);
+}
+
+function checkPermissions() {
+    const screenChecked = document.getElementById('checkScreen').checked;
+    const cameraChecked = document.getElementById('checkCamera').checked;
+    const finalStartBtn = document.getElementById('finalStartBtn');
+    
+    if (screenChecked && cameraChecked) {
+        finalStartBtn.disabled = false;
+    } else {
+        finalStartBtn.disabled = true;
+    }
+}
+
+function requestScreenShare() {
+    if (document.getElementById('checkScreen').checked) return; // Already checked
+    document.getElementById('screenShareModal').style.display = 'flex';
+}
+
+async function startScreenShare() {
+    document.getElementById('screenShareModal').style.display = 'none';
+    try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        window.localScreenStream = stream;
+        document.getElementById('checkScreen').checked = true;
+        checkPermissions();
+        
+        // Handle user stopping share from browser UI
+        stream.getVideoTracks()[0].onended = () => {
+            document.getElementById('checkScreen').checked = false;
+            window.localScreenStream = null;
+            checkPermissions();
+        };
+    } catch (err) {
+        showCustomError("Screen sharing permission denied. Please allow it to proceed.");
+    }
+}
+
+async function requestCamera() {
+    if (document.getElementById('checkCamera').checked) return; // Already checked
+    document.getElementById('cameraModal').style.display = 'flex';
+    
+    // Reset modal state
+    document.getElementById('captureVideo').style.display = 'block';
+    document.getElementById('captureCanvas').style.display = 'none';
+    document.getElementById('btnCapture').style.display = 'block';
+    document.getElementById('btnRecapture').style.display = 'none';
+    document.getElementById('btnUpload').disabled = true;
+    document.getElementById('btnUpload').classList.add('btn-secondary');
+    document.getElementById('btnUpload').classList.remove('btn-primary', 'bg-gradient');
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        window.localCameraStream = stream;
+        document.getElementById('captureVideo').srcObject = stream;
+    } catch (err) {
+        document.getElementById('cameraModal').style.display = 'none';
+        showCustomError("Camera/Microphone permission denied. Please allow it to proceed.");
+    }
+}
+
+async function checkFaceDetected(canvas) {
+    // Try native FaceDetector API first (available in some modern browsers behind flags)
+    if ('FaceDetector' in window) {
+        try {
+            const detector = new window.FaceDetector({ maxDetectedFaces: 1 });
+            const faces = await detector.detect(canvas);
+            if (faces.length > 0) return true;
+        } catch (e) {
+            console.log("FaceDetector API error, falling back to heuristic", e);
+        }
+    }
+    
+    // Fallback heuristic: Image variance calculation
+    // A blank wall or covered camera has low variance (stdDev < 20)
+    // A face has much higher variance
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Check center crop to avoid background edges
+    const imageData = ctx.getImageData(width * 0.25, height * 0.25, width * 0.5, height * 0.5);
+    const data = imageData.data;
+    
+    let sum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+        sum += (data[i] + data[i+1] + data[i+2]) / 3;
+    }
+    const mean = sum / (data.length / 4);
+    
+    let varianceSum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+        const gray = (data[i] + data[i+1] + data[i+2]) / 3;
+        varianceSum += Math.pow(gray - mean, 2);
+    }
+    const variance = varianceSum / (data.length / 4);
+    const stdDev = Math.sqrt(variance);
+    
+    console.log("Calculated image standard deviation:", stdDev);
+    return stdDev > 20; 
+}
+
+async function capturePhoto() {
+    const video = document.getElementById('captureVideo');
+    const canvas = document.getElementById('captureCanvas');
+    
+    // Match canvas size to video actual size
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    video.style.display = 'none';
+    canvas.style.display = 'block';
+    
+    document.getElementById('btnCapture').style.display = 'none';
+    document.getElementById('btnRecapture').style.display = 'block';
+    
+    // Determine if face is detected
+    const hasFace = await checkFaceDetected(canvas);
+    
+    const btnUpload = document.getElementById('btnUpload');
+    if (hasFace) {
+        btnUpload.disabled = false;
+        btnUpload.classList.remove('btn-secondary');
+        btnUpload.classList.add('btn-primary', 'bg-gradient');
+        showCustomSuccess("Image captured successfully!");
+    } else {
+        btnUpload.disabled = true;
+        btnUpload.classList.add('btn-secondary');
+        btnUpload.classList.remove('btn-primary', 'bg-gradient');
+        showCustomError("<b style='font-size: 1.05rem;'>Something went wrong. Please try again.</b><br><span style='font-size: 0.9rem;'>We couldn't detect a face in your photo. Please make sure your face is clearly visible and retake the photo.</span>");
+    }
+}
+
+function recapturePhoto() {
+    document.getElementById('captureVideo').style.display = 'block';
+    document.getElementById('captureCanvas').style.display = 'none';
+    
+    document.getElementById('btnCapture').style.display = 'block';
+    document.getElementById('btnRecapture').style.display = 'none';
+    
+    const btnUpload = document.getElementById('btnUpload');
+    btnUpload.disabled = true;
+    btnUpload.classList.add('btn-secondary');
+    btnUpload.classList.remove('btn-primary', 'bg-gradient');
+}
+
+function uploadPhoto() {
+    document.getElementById('cameraModal').style.display = 'none';
+    document.getElementById('checkCamera').checked = true;
+    checkPermissions();
+    showCustomSuccess("Profile photo uploaded successfully!");
+}
+
+async function requestHardwareAndStart() {
+    if (!window.localCameraStream) {
+        showCustomError("Camera stream not found.");
+        return;
+    }
+    
+    // Attach stream to simulator webcam feed
+    const simWebcam = document.getElementById('simWebcam');
+    if (simWebcam) {
+        simWebcam.srcObject = window.localCameraStream;
+    }
+    
+    // Both conditions met, proceed to start interview
+    startInterview();
+}
+
+
+function restartInterview() {
+    state = {
+        sessionId: null,
+        totalQuestions: 0,
+        currentIndex: 0,
+        currentQuestion: null,
+        isSubmitting: false,
+        recognition: state.recognition,
+        isRecording: false,
+    };
+    showScreen('setup');
+}
+
+// Init speech recognition on load
+document.addEventListener('DOMContentLoaded', () => {
+    initSpeechRecognition();
+});
+</script>
+{% endblock %}

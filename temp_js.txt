@@ -1,0 +1,98 @@
+async function startInterview() {
+    const role = document.getElementById('roleInput').value.trim();
+    if (!role) {
+        showCustomError('Please enter a target role.');
+        return;
+    }
+
+    const company = document.getElementById('companyInput').value;
+    const roundType = document.querySelector('.round-card.selected')?.dataset.round || 'technical_r1';
+    const numQuestions = parseInt(document.getElementById('questionCount').value);
+    const timeLimit = document.getElementById('timeLimitInput')?.value || '30';
+
+    // Show loading
+    showScreen('loading');
+    document.getElementById('loadingMessage').textContent = 'Generating tailored interview questions for you...';
+
+    const startBtn = document.getElementById('startBtn') || document.getElementById('finalStartBtn');
+    if (startBtn) startBtn.disabled = true;
+
+    try {
+        const res = await fetch('/api/mock-interview/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role, company, round_type: roundType, num_questions: numQuestions, time_limit: timeLimit })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to start interview');
+        }
+
+        // Init state
+        state.sessionId = data.session_id;
+        state.totalQuestions = data.total_questions;
+        state.currentIndex = 0;
+        state.currentQuestion = data.question;
+
+        startInterviewTimer();
+
+        // Update simulator header
+        document.getElementById('simTitle').textContent = `${role} Interview`;
+        const roundNames = {
+            technical_r1: 'Technical Round 1',
+            technical_r2: 'System Design',
+            hr_behavioral: 'HR Behavioral',
+            mixed: 'Mixed Round'
+        };
+        document.getElementById('simMeta').textContent = `${roundNames[roundType] || roundType} · ${company}`;
+
+        // Render first question
+        renderQuestion(data.question, 0, data.total_questions);
+        showScreen('simulator');
+
+    } catch (err) {
+        showCustomError('Error: ' + err.message);
+        showScreen('setup');
+    } finally {
+        if (startBtn) startBtn.disabled = false;
+    }
+}
+
+// ═══════════════════════════════════════════════════
+//  Render Question
+// ═══════════════════════════════════════════════════
+function renderQuestion(q, index, total) {
+    document.getElementById('qNumber').textContent = `Question ${index + 1} of ${total}`;
+    document.getElementById('qText').textContent = q.text;
+    
+    // Set current time for AI timestamp
+    const now = new Date();
+    document.getElementById('currentTimeDisplay').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    document.getElementById('aiTimestamp').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    // Reset candidate answer bubble
+    document.getElementById('candidateAnswerBubble').style.display = 'none';
+    document.getElementById('candidateTranscriptText').textContent = '...';
+    document.getElementById('answerInput').value = '';
+    
+    // Ensure button is in Start Recording state
+    state.isRecording = false;
+    const btn = document.getElementById('btnRecording');
+    if (btn) {
+        btn.innerText = 'Start Recording';
+        btn.style.background = '#1e1b4b';
+        btn.style.borderColor = '#1e1b4b';
+        btn.classList.remove('pulse-recording');
+    }
+    const recIndicator = document.getElementById('recordingIndicator');
+    if (recIndicator) recIndicator.style.display = 'none';
+
+    state.currentQuestion = q;
+    state.currentIndex = index;
+}
+
+// ═══════════════════════════════════════════════════
+//  Submit Answer
+// ═══════════════════════════════════════════════════

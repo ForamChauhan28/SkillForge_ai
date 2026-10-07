@@ -2032,18 +2032,17 @@ function uploadPhoto() {
 }
 
 async function requestHardwareAndStart() {
-    if (!window.localCameraStream) {
-        showCustomError("Camera stream not found.");
-        return;
+    // Camera is optional — allow interview to proceed without it
+    if (window.localCameraStream) {
+        const simWebcam = document.getElementById('simWebcam');
+        if (simWebcam) {
+            simWebcam.srcObject = window.localCameraStream;
+        }
+    } else {
+        console.log("No camera stream available — proceeding without webcam.");
     }
     
-    // Attach stream to simulator webcam feed
-    const simWebcam = document.getElementById('simWebcam');
-    if (simWebcam) {
-        simWebcam.srcObject = window.localCameraStream;
-    }
-    
-    // Both conditions met, proceed to start interview
+    // Proceed to start interview
     startInterview();
 }
 
