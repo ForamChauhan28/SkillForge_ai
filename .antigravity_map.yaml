@@ -1,0 +1,31 @@
+project_name: "SkillForge_ai"
+last_updated: "2026-10-04"
+overview: "A Flask-based AI application featuring user authentication, dashboard, learning roadmaps, analytics, chat, and mock interviews."
+
+modules:
+  - path: "app.py"
+    purpose: "Main application factory, configuration, and blueprint registration."
+    exports:
+      - "create_app"
+    dependencies:
+      - "config.py"
+      - "models/db.py"
+      - "routes/auth_routes.py"
+      - "routes/dashboard_routes.py"
+      - "routes/roadmap_routes.py"
+      - "routes/api_routes.py"
+      - "routes/analytics_routes.py"
+      - "routes/chat_routes.py"
+      - "routes/mock_interview_routes.py"
+
+  - path: "config.py"
+    purpose: "Stores configuration variables such as secret keys and OAuth credentials."
+    exports:
+      - "Config"
+    dependencies: []
+
+  - path: "models/db.py"
+    purpose: "Database initialization and connections."
+    exports:
+      - "init_database"
+    dependencies: []
